@@ -1,0 +1,34 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+  <h2>Pagamento della Sezione Finale</h2>
+
+  <p><strong>Sezione selezionata:</strong>
+    {% if selected_section == 'section1' %} Sezione 1 (Lotteria)
+    {% elif selected_section == 'section2' %} Sezione 2 (Lotteria)
+    {% elif selected_section == 'section3' %} Sezione 3 (Lotteria)
+    {% elif selected_section == 'pgg_first5' %} Round PGG 1–5
+    {% else %} Round PGG 6–10
+    {% endif %}
+  </p>
+
+  {% if selected_section in ['section1','section2','section3'] %}
+    <h4>Dettagli della Lotteria</h4>
+    <p>La tua scelta: Hai acquistato <strong>{{ selected_lottery_choice }}</strong> biglietto/i</p>
+    <p>Biglietto estratto: <strong>{{ selected_lottery_draw }}</strong></p>
+    <p>Guadagno della sezione: <strong>{{ selected_lottery_payoff }}</strong></p>
+
+  {% else %}
+    <h4>Dettagli del Gioco dei Beni Pubblici</h4>
+    <p>Round selezionato: <strong>{{ selected_pgg_round }}</strong></p>
+    <p>Il tuo contributo: <strong>{{ selected_pgg_contribution }}</strong></p>
+    <p>Il tuo guadagno: <strong>{{ selected_pgg_payoff }}</strong></p>
+  {% endif %}
+
+  <hr>
+  <p><strong>Totale pagato a te:</strong> {{ final_payment }}</p>
+  <p>Grazie per la partecipazione!</p>
+
+{{ next_button }}
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "global/Page.html" %}
+{% load otree_tags %}
+
+{% block title %}
+    Istruzioni
+{% endblock %}
+
+{% block content %}
+
+  <h4>Benvenuto</h4>
+  <p>
+    Benvenuto al nostro esperimento! Ti chiediamo gentilmente di completare tutte le parti di queste istruzioni
+    e di evitare qualsiasi comunicazione con gli altri partecipanti fino al termine dell'esperimento
+    (annunceremo pubblicamente la fine della sessione).
+  </p>
+
+  <h4>Panoramica</h4>
+  <p>L’esperimento è composto da tre parti:</p>
+  <ol>
+    <li><strong>Parte I</strong>: Sezioni S1, S2, S3</li>
+    <li><strong>Parte II</strong>: Sezioni S4, S5</li>
+    <li><strong>Questionario</strong></li>
+  </ol>
+  <p>
+    Sulla busta e sulla prima pagina di queste istruzioni troverai il tuo identificativo
+    (es. “Soleto 1”, “Soleto 2”, ecc.). Ti preghiamo di ricordare questo codice,
+    poiché sarai identificato e pagato in base ad esso.
+  </p>
+
+  <h4>Punti e Pagamento</h4>
+  <p>
+    Guadagnerai <strong>300 punti sperimentali</strong> per partecipare. Ogni punto sperimentale corrisponde a €0,01.
+  </p>
+  <p>
+    Per ogni sezione riceverai una dotazione iniziale (mostrata all’inizio).
+    Il tuo guadagno nella sezione è la dotazione più (o meno) i punti che guadagni.
+    <em>Esempio:</em> In Sezione 1 inizi con 400 punti; se guadagni 100 punti, il tuo totale sarà 500.
+  </p>
+  <p>
+    Alla fine, <strong>una sezione</strong> sarà selezionata casualmente per il pagamento.
+  </p>
+
+  <h4>Procedura di Pagamento</h4>
+  <ol>
+    <li>
+      Annunceremo quando siamo pronti per pagare. Riceverai immediatamente 300 punti.
+    </li>
+    <li>
+      Lanceremo una moneta:
+      <ul>
+        <li><strong>Testa:</strong> sarai pagato sulla base della Parte I.</li>
+        <li><strong>Croce:</strong> sarai pagato sulla base della Parte II.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h4>Procedura Parte I</h4>
+  <p>
+    Pescherai una pallina da un’urna contenente i numeri 1, 2 e 3.
+    Riceverai il pagamento relativo alla sezione corrispondente al numero estratto.
+  </p>
+
+  <h4>Procedura Parte II</h4>
+  <p>
+    Il guadagno della Parte II è determinato sia dalla tua performance che da un evento esogeno:
+  </p>
+  <ul>
+    <li>
+      Per ciascuna delle Sezioni 4 e 5, un dispositivo casuale determina se si verifica un “disastro”.
+    </li>
+    <li>
+      Se si verifica un disastro, i tuoi guadagni per quella sezione sono azzerati (ottieni 0 punti).
+    </li>
+    <li>
+      Se non si verifica un disastro, ricevi la dotazione più i punti guadagnati.
+    </li>
+  </ul>
+  <p>
+    Poi pescherai una pallina da un’urna contenente i numeri 4 e 5, e riceverai il pagamento della sezione corrispondente.
+    Puoi anche guadagnare punti extra con le tue previsioni nella Parte II.
+  </p>
+
+  <br>
+  {{ next_button }}
+
+{% endblock %}

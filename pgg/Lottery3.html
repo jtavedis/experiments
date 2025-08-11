@@ -1,0 +1,35 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+  <h2>Sezione 3: Lotteria</h2>
+
+  <p>La tua dotazione per questo compito è di <strong>400 punti sperimentali (€ 4)</strong>.
+  All'interno di un'urna trasparente ci sono quattro biglietti numerati da 1 a 4.
+  Se alla fine dell'esperimento la <strong>Sezione 3</strong> viene selezionata per il pagamento, estrarremo un biglietto a caso.
+  Ogni biglietto costa € 0, ma:</p>
+
+  <ul>
+    <li><strong>Acquista 4 biglietti:</strong> Vinci €1 con certezza.
+        <em>Guadagno totale:</em> 400 pt + 100 pt = 500 pt (€ 5)</li>
+    <li><strong>Acquista 3 biglietti (1,2,3):</strong>
+        • Vinci €2 se viene estratto 1–3;
+        • Perdi €1 se viene estratto il 4.
+        <em>Guadagno totale:</em> 400 pt + (200 pt o –100 pt) = 600 pt o 300 pt (€ 6 o € 3)</li>
+    <li><strong>Acquista 2 biglietti (1,2):</strong>
+        • Vinci €3 se viene estratto 1–2;
+        • Perdi €2 se viene estratto 3–4.
+        <em>Guadagno totale:</em> 400 pt + (300 pt o –200 pt) = 700 pt o 200 pt (€ 7 o € 2)</li>
+    <li><strong>Acquista 1 biglietto (1):</strong>
+        • Vinci €5 se viene estratto 1;
+        • Perdi €3 se viene estratto 2–4.
+        <em>Guadagno totale:</em> 400 pt + (500 pt o –300 pt) = 900 pt o 100 pt (€ 9 o € 1)</li>
+  </ul>
+
+  <p><strong>Seleziona quanti biglietti vuoi acquistare:</strong></p>
+
+  <form method="post">
+    {{ form.lottery3_choice }}
+    <button type="submit">Continua</button>
+  </form>
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "global/Page.html" %}
+{% load otree_tags %}
+
+{% block title %}
+  Contributo
+{% endblock %}
+
+{% block content %}
+
+  <h4>1) Il tuo contributo</h4>
+  <p>Quanto desideri contribuire?</p>
+  {{ formfield player.contribution }}
+
+  <hr>
+
+  <h4>2) Opinione personale</h4>
+  <p>
+    Ti chiediamo ora di fornire una stima di quanti punti un soggetto del tuo gruppo,
+    <em>incluso te stesso</em>, dovrebbe contribuire.
+    Supponendo che tu sia il Partecipante 1, compila la seguente tabella:
+  </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Partecipante 2</th>
+        <th>Partecipante 3</th>
+        <th>Partecipante 4</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ formfield player.personal_belief_p2 }}</td>
+        <td>{{ formfield player.personal_belief_p3 }}</td>
+        <td>{{ formfield player.personal_belief_p4 }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>3) Aspettativa empirica</h4>
+  <p>
+    Ti chiediamo ora di stimare quanti punti gli <em>altri tre</em> membri del tuo gruppo spenderanno.
+    Supponendo che tu sia il Partecipante 1, compila la seguente tabella:
+  </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Partecipante 2</th>
+        <th>Partecipante 3</th>
+        <th>Partecipante 4</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ formfield player.empirical_exp_p2 }}</td>
+        <td>{{ formfield player.empirical_exp_p3 }}</td>
+        <td>{{ formfield player.empirical_exp_p4 }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>4) Aspettativa normativa</h4>
+  <p>
+    Infine, ti chiediamo di fornire una stima di quanti punti ognuno dei membri del gruppo pensa che ciascuno debba contribuire.
+    Supponendo che tu sia il Partecipante 1, compila la seguente tabella:
+  </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Partecipante 2</th>
+        <th>Partecipante 3</th>
+        <th>Partecipante 4</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ formfield player.normative_exp_p2 }}</td>
+        <td>{{ formfield player.normative_exp_p3 }}</td>
+        <td>{{ formfield player.normative_exp_p4 }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+  {{ next_button }}
+
+{% endblock %}

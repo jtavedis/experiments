@@ -1,0 +1,57 @@
+{% extends "global/Page.html" %}
+{% load otree_tags %}
+
+{% block title %}
+    Istruzioni
+{% endblock %}
+
+{% block content %}
+
+  <h4>Interazione e Anonimato</h4>
+  <p>
+    Interagirai con altri tre partecipanti. Le loro identità rimarranno sconosciute per tutta la durata dell'esperimento.
+  </p>
+
+  <h4>Dotazione e Contributo</h4>
+  <p>
+    All'inizio di questo round, riceverai una dotazione di <strong>300 punti</strong> (ognuno vale €0,01).
+    Decidi quanti di questi punti investire nel fondo comune.
+  </p>
+
+  <h4>Soglia di Successo</h4>
+  <p>
+    Se il contributo totale del tuo gruppo al fondo comune raggiunge <strong>600 punti</strong>,
+    ogni partecipante tiene i punti che non ha investito.
+  </p>
+
+  <h4>Se Sotto la Soglia</h4>
+  <p>
+    Se i contributi totali sono inferiori a 600 punti:
+  </p>
+  <ul>
+    <li>Viene estratto un numero casuale tra 1 e 10.</li>
+    <li>
+      Se il numero è ≤ 9 (<strong>90% di probabilità</strong>), tutti perdono tutti i punti del round.
+    </li>
+    <li>
+      Se il numero è > 9 (<strong>10% di probabilità</strong>), tutti tengono i punti che non hanno investito.
+    </li>
+  </ul>
+
+  <h4>Riepilogo dei Possibili Risultati</h4>
+  <ol>
+    <li>
+      <strong>Almeno 600 punti:</strong> tieni i punti non investiti.
+    </li>
+    <li>
+      <strong>Meno di 600 & estrazione ≤ 9:</strong> perdi tutti i punti.
+    </li>
+    <li>
+      <strong>Meno di 600 & estrazione > 9:</strong> tieni i punti non investiti.
+    </li>
+  </ol>
+
+  <br>
+  {{ next_button }}
+
+{% endblock %}
