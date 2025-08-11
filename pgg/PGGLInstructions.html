@@ -71,7 +71,7 @@
 
 <style>
   #timer_badge{
-      position: fixed; top:12px; right:12px; padding:6px 10px;
+      position: fixed; top:52px; right:12px; padding:6px 10px;
       font-weight:600; font-family:system-ui, sans-serif;
       border:1px solid rgba(0,0,0,.15); border-radius:999px; background:white;
       box-shadow:0 2px 8px rgba(0,0,0,.08); z-index:1000;
@@ -113,5 +113,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const iv = setInterval(tick, 1000);
 });
 </script>
+
+<style>
+/* participant ID badge below the timer */
+  #pid_badge{
+      position: fixed;
+      top: 12px;  /* if you remove the timer, change to 12px */
+      right: 12px;
+      padding: 6px 10px;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      z-index: 1000;
+      color: #e81a2b;
+  }
+</style>
+
+<!-- Participant ID badge -->
+<div id="pid_badge" aria-label="Il tuo codice identificativo">
+  Codice Identificativo: {{ participant.id_in_session }}
+</div>
 
 {% endblock %}

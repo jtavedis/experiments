@@ -85,25 +85,28 @@ class Player(BasePlayer):
     )
 
     # Section 1 lottery
-    lottery_choice   = models.IntegerField(
-        choices=[[1,'Buy 1'],[2,'Buy 2'],[3,'Buy 3'],[4,'Buy 4']],
-        label="(Sec 1) How many of the 4 tickets?"
+    lottery_choice = models.IntegerField(
+        choices=[[1, '1'], [2, '2'], [3, '3'], [4, '4']],
+        label="Quanti biglietti vuoi acquistare?",
+        widget=widgets.RadioSelect,  # or widgets.RadioSelect for vertical
     )
     lottery_draw     = models.IntegerField(blank=True, null=True)
     lottery_payoff   = models.CurrencyField(blank=True, null=True)
 
     # Section 2 lottery
     lottery2_choice  = models.IntegerField(
-        choices=[[1,'Buy 1'],[2,'Buy 2'],[3,'Buy 3'],[4,'Buy 4']],
-        label="(Sec 2) How many of the 4 tickets?"
+        choices=[[1, '1'], [2, '2'], [3, '3'], [4, '4']],
+        label="Quanti biglietti vuoi acquistare?",
+        widget=widgets.RadioSelect,  # or widgets.RadioSelect for vertical
     )
     lottery2_draw    = models.IntegerField(blank=True, null=True)
     lottery2_payoff  = models.CurrencyField(blank=True, null=True)
 
     # Section 3 lottery
     lottery3_choice  = models.IntegerField(
-        choices=[[1,'Buy 1'],[2,'Buy 2'],[3,'Buy 3'],[4,'Buy 4']],
-        label="(Sec 3) How many of the 4 tickets?"
+        choices=[[1, '1'], [2, '2'], [3, '3'], [4, '4']],
+        label="Quanti biglietti vuoi acquistare?",
+        widget=widgets.RadioSelect,  # or widgets.RadioSelect for vertical
     )
     lottery3_draw    = models.IntegerField(blank=True, null=True)
     lottery3_payoff  = models.CurrencyField(blank=True, null=True)
@@ -191,7 +194,7 @@ def section3_delta(choice: int, draw: int):
 # Reusable TimedPage base
 # ------------------------
 class TimedPage(Page):
-    """Base page with a minimum time requirement."""
+    """Client-timed page: server only checks the hidden field."""
 
     @staticmethod
     def min_wait(player: Player) -> int:
@@ -199,40 +202,18 @@ class TimedPage(Page):
 
     @staticmethod
     def js_vars(player: Player):
+        # used by your JS to know how long to wait
         return dict(min_wait=TimedPage.min_wait(player))
 
     @staticmethod
-    def _arrive_key(player: Player) -> str:
-        part = player.participant
-        page_id = f'{part._current_app_name}.{part._current_page_name}'
-        return f'arrive_{page_id}'
-
-    @staticmethod
-    def vars_for_template(player: Player):
-        import time
-        part = player.participant
-        key = TimedPage._arrive_key(player)
-        if key not in part.vars:
-            part.vars[key] = time.time()
-        return {}
-
-    @staticmethod
     def error_message(player: Player, values):
-        import time
-        part = player.participant
-        key = TimedPage._arrive_key(player)
-        arrived = part.vars.get(key, time.time())
-        elapsed = time.time() - arrived
+        v = values.get('passed_timer')
+        # accept True, "1", "true", "on"
+        if v is True or str(v).lower() in ('1', 'true', 'on'):
+            return
         mw = TimedPage.min_wait(player)
-        if elapsed < mw:
-            remaining = int(mw - elapsed)
-            return f'Please spend at least {mw} seconds on this page. {remaining}s remaining.'
+        return f'Please spend at least {mw} seconds on this page.'
 
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        part = player.participant
-        key = TimedPage._arrive_key(player)
-        part.vars.pop(key, None)
 
 # PAGES
 class Instructions(TimedPage):
@@ -242,6 +223,12 @@ class Instructions(TimedPage):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            session_id=player.id_in_subsession
+        )
 
 
 class Lottery(Page):

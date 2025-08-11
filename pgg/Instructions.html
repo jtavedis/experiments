@@ -1,4 +1,4 @@
-{% extends "global/Page.html" %}
+{% extends "otree/Page.html" %}
 {% load otree %}
 
 {% block title %}Istruzioni{% endblock %}
@@ -8,92 +8,79 @@
 <!-- Top-right timer badge -->
 <div id="timer_badge" aria-live="polite" role="timer">00:00</div>
 
-  <h4>Benvenuto</h4>
-  <p>
-    Benvenuto al nostro esperimento! Ti chiediamo gentilmente di completare tutte le parti di queste istruzioni
-    e di evitare qualsiasi comunicazione con gli altri partecipanti fino al termine dell'esperimento
-    (annunceremo pubblicamente la fine della sessione).
-  </p>
+<h5>Benvenuto</h5>
+<p>
+  Benvenuto al nostro esperimento! Ti chiediamo di completare tutte le parti senza comunicare con gli altri partecipanti.
+  Rimani alla tua postazione finché non ti verrà detto di aver terminato.
+</p>
 
-  <h4>Panoramica</h4>
-  <p>L’esperimento è composto da tre parti:</p>
-  <ol>
-    <li><strong>Parte I</strong>: Sezioni S1, S2, S3</li>
-    <li><strong>Parte II</strong>: Sezioni S4, S5</li>
-    <li><strong>Questionario</strong></li>
-  </ol>
-  <p>
-    Sulla busta e sulla prima pagina di queste istruzioni troverai il tuo identificativo
-    (es. “Soleto 1”, “Soleto 2”, ecc.). Ti preghiamo di ricordare questo codice,
-    poiché sarai identificato e pagato in base ad esso.
-  </p>
+<h5>Panoramica</h5>
+<p>
+  L’esperimento è composto da tre parti: nella <strong>Parte I</strong> completerai tre sezioni (S1, S2, S3) basate su scelte di lotteria;
+  nella <strong>Parte II</strong> giocherai due sezioni (S4 e S5) di uno scenario di fondo comune; infine compilerai un <strong>questionario</strong>.
+  Il tuo <strong>codice identificativo</strong>, mostrato sullo schermo, sarà usato per registrare e pagare i guadagni: ricordalo con attenzione.
+</p>
 
-  <h4>Punti e Pagamento</h4>
-  <p>
-    Guadagnerai <strong>300 punti sperimentali</strong> per partecipare. Ogni punto sperimentale corrisponde a €0,01.
-  </p>
-  <p>
-    Per ogni sezione riceverai una dotazione iniziale (mostrata all’inizio).
-    Il tuo guadagno nella sezione è la dotazione più (o meno) i punti che guadagni.
-    <em>Esempio:</em> In Sezione 1 inizi con 400 punti; se guadagni 100 punti, il tuo totale sarà 500.
-  </p>
-  <p>
-    Alla fine, <strong>una sezione</strong> sarà selezionata casualmente per il pagamento.
-  </p>
+<h5>Punti e Pagamento</h5>
+<p>
+  Per la sola partecipazione riceverai <strong>300 punti sperimentali</strong>, ciascuno del valore di €0,01.
+  In ogni sezione vedrai sullo schermo la tua dotazione iniziale. Il guadagno della sezione sarà dato
+  dalla dotazione più (o meno) i punti derivanti dalle tue scelte e dagli esiti casuali.
+</p>
+<p>
+  <em>Esempio:</em> nella Sezione 1 inizi con 400 punti; se guadagni 100 punti, il totale della sezione sarà 500 punti.
+</p>
+<p>
+  Al termine dell’esperimento, il computer selezionerà in modo casuale <strong>una sola sezione</strong> o <strong>un singolo round</strong>
+  per determinare il pagamento variabile.
+</p>
 
-  <h4>Procedura di Pagamento</h4>
-  <ol>
-    <li>
-      Annunceremo quando siamo pronti per pagare. Riceverai immediatamente 300 punti.
-    </li>
-    <li>
-      Lanceremo una moneta:
-      <ul>
-        <li><strong>Testa:</strong> sarai pagato sulla base della Parte I.</li>
-        <li><strong>Croce:</strong> sarai pagato sulla base della Parte II.</li>
-      </ul>
-    </li>
-  </ol>
+<h5>Determinazione del Pagamento Finale</h5>
+<p>
+  Il computer sceglierà a sorte:
+</p>
+<ul>
+  <li>una tra le tre sezioni di lotteria (S1, S2 o S3), <em>oppure</em></li>
+  <li>un round a caso tra 1–5 della Sezione 4 <em>oppure</em> tra 6–10 della Sezione 5.</li>
+</ul>
+<p>
+  La scelta e gli eventuali sorteggi saranno mostrati sullo schermo e il pagamento sarà calcolato in base al risultato della sezione o del round estratto.
+</p>
 
-  <h4>Procedura Parte I</h4>
-  <p>
-    Pescherai una pallina da un’urna contenente i numeri 1, 2 e 3.
-    Riceverai il pagamento relativo alla sezione corrispondente al numero estratto.
-  </p>
+<h5>Parte I (S1–S3)</h5>
+<p>
+  Visualizzerai la dotazione iniziale e le opzioni di acquisto biglietti. Farai le tue scelte direttamente al computer
+  e tutti i sorteggi (ad es. il numero del biglietto estratto) saranno eseguiti dal sistema e mostrati sullo schermo.
+</p>
 
-  <h4>Procedura Parte II</h4>
-  <p>
-    Il guadagno della Parte II è determinato sia dalla tua performance che da un evento esogeno:
-  </p>
-  <ul>
-    <li>
-      Per ciascuna delle Sezioni 4 e 5, un dispositivo casuale determina se si verifica un “disastro”.
-    </li>
-    <li>
-      Se si verifica un disastro, i tuoi guadagni per quella sezione sono azzerati (ottieni 0 punti).
-    </li>
-    <li>
-      Se non si verifica un disastro, ricevi la dotazione più i punti guadagnati.
-    </li>
-  </ul>
-  <p>
-    Poi pescherai una pallina da un’urna contenente i numeri 4 e 5, e riceverai il pagamento della sezione corrispondente.
-    Puoi anche guadagnare punti extra con le tue previsioni nella Parte II.
-  </p>
+<h5>Parte II (S4–S5)</h5>
+<p>
+  In questa parte interagirai in forma anonima con altri tre partecipanti. In ogni round riceverai una dotazione iniziale e deciderai quanto destinarne a un fondo comune.
+</p>
+<p>
+  I tuoi guadagni dipenderanno sia dalle decisioni del gruppo sia da un elemento casuale. Le regole precise (soglie, probabilità ed esempi) sono descritte nelle istruzioni specifiche di questa sezione.
+</p>
+
+
+<h5>Indicazioni Finali</h5>
+<p>
+  Segui attentamente le istruzioni sullo schermo e conferma ogni scelta quando richiesto. In caso di dubbi,
+  alza la mano e attendi l’assistenza dello sperimentatore. Grazie per la partecipazione!
+</p>
 
 {% next_button %}
 
-  <br>
-<!-- hidden field for the dummy form field -->
+<br>
+<!-- hidden field for the dummy form field (TimedPage expects this) -->
 <input type="hidden" name="passed_timer" value="0">
 
 <div id="timer_msg" style="margin-top:1rem;"></div>
 
 <style>
-  /* fixed timer chip in the top-right */
+  /* fixed timer chip in the top-right (placed below the ID badge) */
   #timer_badge{
       position: fixed;
-      top: 12px;
+      top: 52px;
       right: 12px;
       padding: 6px 10px;
       font-weight: 600;
@@ -104,6 +91,22 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
       z-index: 1000;
   }
+
+  /* participant ID badge (top-right) */
+  #pid_badge{
+      position: fixed;
+      top: 12px;  /* if you remove the timer, keep 12px */
+      right: 12px;
+      padding: 6px 10px;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      z-index: 1000;
+      color: #e81a2b; /* custom text color */
+  }
 </style>
 
 <script>
@@ -111,14 +114,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // fall back to 60s if js_vars is not present for any reason
     const minWait = (window.js_vars && js_vars.min_wait) || 60;
 
-    // Next button from Page.html
+    // Next button from oTree base template
     const btn    = document.querySelector('button[type="submit"], .otree-btn-next');
     const msg    = document.getElementById('timer_msg');
     const hidden = document.querySelector('input[name="passed_timer"]');
     const badge  = document.getElementById('timer_badge');
 
     if (!btn) {
-        console.warn('Next button not found. Check that you extend global/Page.html.');
+        console.warn('Next button not found (should be present when extending "otree/Page.html").');
         return;
     }
 
@@ -149,5 +152,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const iv = setInterval(tick, 1000);
 });
 </script>
+
+<!-- Participant ID badge -->
+<div id="pid_badge" aria-label="Il tuo codice identificativo">
+  Codice Identificativo: {{ participant.id_in_session }}
+</div>
 
 {% endblock %}
