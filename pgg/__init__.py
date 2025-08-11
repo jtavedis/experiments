@@ -17,6 +17,7 @@ class C(BaseConstants):
     LOT_ENDOWMENT     = cu(400)  # Sec 1 & 3: 400 pts = €4
     LOT2_ENDOWMENT    = cu(600)  # Sec 2: 600 pts = €6
     ROUND_CHANGE      = 6
+    MIN_WAIT = 10
 
 
 class Subsession(BaseSubsession):
@@ -117,6 +118,8 @@ class Player(BasePlayer):
     selected_pgg_round        = models.IntegerField(blank=True, null=True)
     selected_pgg_contribution = models.CurrencyField(blank=True, null=True)
     selected_pgg_payoff       = models.CurrencyField(blank=True, null=True)
+    # minimum time to remain on instruction page
+    passed_timer = models.BooleanField(initial=False)
 
 
 def creating_session(subsession):
@@ -152,10 +155,90 @@ def set_payoffs(group: Group):
         p.participant.vars['pgg_contributions'] = cs
         p.participant.vars['pgg_payoffs']       = ps
 
+# ----- Section 1 (base 400) -----
+def section1_delta(choice: int, draw: int):
+    # +100 for sure with 4; otherwise +{150,200,300} if draw <= choice else 0
+    if choice == 4:
+        return cu(100)
+    pos = {3: cu(150), 2: cu(200), 1: cu(300)}
+    return pos[choice] if draw <= choice else cu(0)
+
+# ----- Section 2 (base 600) -----
+def section2_delta(choice: int, draw: int):
+    # Always a loss or 0:
+    # 4 -> -100 always
+    # 3 -> -150 if draw<=3 else 0
+    # 2 -> -250 if draw<=2 else 0
+    # 1 -> -400 if draw==1 else 0
+    if choice == 4:
+        return cu(-100)
+    loss = {3: cu(-150), 2: cu(-250), 1: cu(-400)}
+    return loss[choice] if draw <= choice else cu(0)
+
+# ----- Section 3 (base 400) -----
+def section3_delta(choice: int, draw: int):
+    # 4 -> +100 always
+    # 3 -> +200 if draw<=3 else -100
+    # 2 -> +300 if draw<=2 else -200
+    # 1 -> +500 if draw==1 else -300
+    if choice == 4:
+        return cu(100)
+    pos = {3: cu(200), 2: cu(300), 1: cu(500)}
+    neg = {3: cu(-100), 2: cu(-200), 1: cu(-300)}
+    return pos[choice] if draw <= choice else neg[choice]
+
+# ------------------------
+# Reusable TimedPage base
+# ------------------------
+class TimedPage(Page):
+    """Base page with a minimum time requirement."""
+
+    @staticmethod
+    def min_wait(player: Player) -> int:
+        return C.MIN_WAIT
+
+    @staticmethod
+    def js_vars(player: Player):
+        return dict(min_wait=TimedPage.min_wait(player))
+
+    @staticmethod
+    def _arrive_key(player: Player) -> str:
+        part = player.participant
+        page_id = f'{part._current_app_name}.{part._current_page_name}'
+        return f'arrive_{page_id}'
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        import time
+        part = player.participant
+        key = TimedPage._arrive_key(player)
+        if key not in part.vars:
+            part.vars[key] = time.time()
+        return {}
+
+    @staticmethod
+    def error_message(player: Player, values):
+        import time
+        part = player.participant
+        key = TimedPage._arrive_key(player)
+        arrived = part.vars.get(key, time.time())
+        elapsed = time.time() - arrived
+        mw = TimedPage.min_wait(player)
+        if elapsed < mw:
+            remaining = int(mw - elapsed)
+            return f'Please spend at least {mw} seconds on this page. {remaining}s remaining.'
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        part = player.participant
+        key = TimedPage._arrive_key(player)
+        part.vars.pop(key, None)
 
 # PAGES
+class Instructions(TimedPage):
+    form_model = 'player'
+    form_fields = ['passed_timer']
 
-class Instructions(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
@@ -170,14 +253,15 @@ class Lottery(Page):
         return player.round_number == 1
 
     @staticmethod
-    def before_next_page(player, timeout_happened):
+    def before_next_page(player: Player, timeout_happened):
         draw = random.randint(1, 4)
-        player.lottery_draw = draw
-        # ... compute payoff ...
-        # store in participant.vars for final selection
-        player.participant.vars['section1_choice'] = player.lottery_choice
-        player.participant.vars['section1_draw']   = draw
-        player.participant.vars['section1_payoff'] = player.lottery_payoff
+        player.lottery_draw   = draw
+        delta                 = section1_delta(player.lottery_choice, draw)
+        player.lottery_payoff = C.LOT_ENDOWMENT + delta  # 400 base
+        pvars = player.participant.vars
+        pvars['section1_choice'] = player.lottery_choice
+        pvars['section1_draw']   = draw
+        pvars['section1_payoff'] = player.lottery_payoff
 
 
 class Lottery2(Page):
@@ -189,13 +273,15 @@ class Lottery2(Page):
         return player.round_number == 1
 
     @staticmethod
-    def before_next_page(player, timeout_happened):
+    def before_next_page(player: Player, timeout_happened):
         draw = random.randint(1, 4)
-        player.lottery2_draw = draw
-        # ... compute payoff ...
-        player.participant.vars['section2_choice'] = player.lottery2_choice
-        player.participant.vars['section2_draw']   = draw
-        player.participant.vars['section2_payoff'] = player.lottery2_payoff
+        player.lottery2_draw   = draw
+        delta                  = section2_delta(player.lottery2_choice, draw)
+        player.lottery2_payoff = C.LOT2_ENDOWMENT + delta  # 600 base
+        pvars = player.participant.vars
+        pvars['section2_choice'] = player.lottery2_choice
+        pvars['section2_draw']   = draw
+        pvars['section2_payoff'] = player.lottery2_payoff
 
 
 class Lottery3(Page):
@@ -207,13 +293,15 @@ class Lottery3(Page):
         return player.round_number == 1
 
     @staticmethod
-    def before_next_page(player, timeout_happened):
+    def before_next_page(player: Player, timeout_happened):
         draw = random.randint(1, 4)
-        player.lottery3_draw = draw
-        # ... compute payoff ...
-        player.participant.vars['section3_choice'] = player.lottery3_choice
-        player.participant.vars['section3_draw']   = draw
-        player.participant.vars['section3_payoff'] = player.lottery3_payoff
+        player.lottery3_draw   = draw
+        delta                  = section3_delta(player.lottery3_choice, draw)
+        player.lottery3_payoff = C.LOT_ENDOWMENT + delta  # 400 base
+        pvars = player.participant.vars
+        pvars['section3_choice'] = player.lottery3_choice
+        pvars['section3_draw']   = draw
+        pvars['section3_payoff'] = player.lottery3_payoff
 
 
 class LotteryWaitPage(WaitPage):
@@ -224,13 +312,19 @@ class LotteryWaitPage(WaitPage):
     body_text = "Waiting for all participants to finish the lotteries..."
 
 
-class PGGHInstructions(Page):
+class PGGHInstructions(TimedPage):
+    form_model = 'player'
+    form_fields = ['passed_timer']
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
 
 
-class PGGLInstructions(Page):
+class PGGLInstructions(TimedPage):
+    form_model = 'player'
+    form_fields = ['passed_timer']
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.ROUND_CHANGE

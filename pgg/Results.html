@@ -4,7 +4,7 @@
   <h2>Risultati del Round {{ player.round_number }}</h2>
 
   <p><strong>Contributi totali del gruppo:</strong> {{ total_contributions }}</p>
-  <p><strong>Hai mantenuto:</strong> {{ amount_kept }}</p>
+  <p><strong>Hai tenuto </strong> {{ amount_kept }} per te.</p>
 
   {% if disaster_roll != None %}
     <p><strong>Il numero casuale generato è:</strong> {{ disaster_roll }}</p>
@@ -19,6 +19,6 @@
 
   <p><strong>Il tuo guadagno in questo round:</strong> {{ payoff }}</p>
 
-{{ next_button }}
+  {% next_button %}
 
 {% endblock %}

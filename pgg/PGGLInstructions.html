@@ -1,11 +1,12 @@
 {% extends "global/Page.html" %}
-{% load otree_tags %}
+{% load otree %}
 
-{% block title %}
-    Istruzioni
-{% endblock %}
+{% block title %}Istruzioni - Parte III{% endblock %}
 
 {% block content %}
+
+<!-- Top-right timer badge -->
+<div id="timer_badge" aria-live="polite" role="timer">00:00</div>
 
   <h2>Interazione e Anonimato</h2>
   <p>
@@ -51,7 +52,66 @@
     </li>
   </ol>
 
-  <br>
   {{ next_button }}
+
+<br>
+
+<!-- put the hidden field BEFORE the next button so it's inside the form -->
+<input type="hidden" name="passed_timer" value="0">
+
+<!-- render (or hide) field errors to satisfy oTree -->
+<div id="passed_timer_errors" style="display:none;">
+  {{ formfield_errors 'passed_timer' }}
+</div>
+
+<br>
+
+
+<div id="timer_msg" style="margin-top:1rem;"></div>
+
+<style>
+  #timer_badge{
+      position: fixed; top:12px; right:12px; padding:6px 10px;
+      font-weight:600; font-family:system-ui, sans-serif;
+      border:1px solid rgba(0,0,0,.15); border-radius:999px; background:white;
+      box-shadow:0 2px 8px rgba(0,0,0,.08); z-index:1000;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const minWait = (window.js_vars && js_vars.min_wait) || 60;
+    const btn    = document.querySelector('button[type="submit"], .otree-btn-next');
+    const msg    = document.getElementById('timer_msg');
+    const hidden = document.querySelector('input[name="passed_timer"]');
+    const badge  = document.getElementById('timer_badge');
+
+    if (!btn) return;
+
+    const fmt = s => {
+        const m = Math.floor(s / 60), r = s % 60;
+        return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
+    };
+
+    btn.disabled = true;
+    let remaining = parseInt(minWait, 10) || 0;
+
+    const tick = () => {
+        if (remaining <= 0) {
+            btn.disabled = false;
+            msg.textContent = 'Puoi continuare.';
+            hidden.value = '1';
+            badge.textContent = '00:00';
+            clearInterval(iv);
+        } else {
+            msg.textContent = `Per favore leggi bene le istruzioni. Puoi continuare tra ${remaining}s.`;
+            badge.textContent = fmt(remaining);
+            remaining -= 1;
+        }
+    };
+    tick();
+    const iv = setInterval(tick, 1000);
+});
+</script>
 
 {% endblock %}

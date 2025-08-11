@@ -1,13 +1,14 @@
 {% extends "global/Page.html" %}
-{% load otree_tags %}
+{% load otree %}
 
-{% block title %}
-    Istruzioni
-{% endblock %}
+{% block title %}Istruzioni - Parte II{% endblock %}
 
 {% block content %}
 
-  <h4>Interazione e Anonimato</h4>
+<!-- Top-right timer badge -->
+<div id="timer_badge" aria-live="polite" role="timer">00:00</div>
+
+<h4>Interazione e Anonimato</h4>
   <p>
     Interagirai con altri tre partecipanti. Le loro identità rimarranno sconosciute per tutta la durata dell'esperimento.
   </p>
@@ -52,6 +53,73 @@
   </ol>
 
   <br>
-  {{ next_button }}
+  {% next_button %}
+
+  <br>
+<!-- hidden field for the dummy form field -->
+<input type="hidden" name="passed_timer" value="0">
+
+<div id="timer_msg" style="margin-top:1rem;"></div>
+
+<style>
+  /* fixed timer chip in the top-right */
+  #timer_badge{
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      padding: 6px 10px;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      z-index: 1000;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // fall back to 60s if js_vars is not present for any reason
+    const minWait = (window.js_vars && js_vars.min_wait) || 60;
+
+    // Next button from Page.html
+    const btn    = document.querySelector('button[type="submit"], .otree-btn-next');
+    const msg    = document.getElementById('timer_msg');
+    const hidden = document.querySelector('input[name="passed_timer"]');
+    const badge  = document.getElementById('timer_badge');
+
+    if (!btn) {
+        console.warn('Next button not found. Check that you extend global/Page.html.');
+        return;
+    }
+
+    const fmt = s => {
+        const m = Math.floor(s / 60);
+        const r = s % 60;
+        return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
+    };
+
+    btn.disabled = true;
+    let remaining = parseInt(minWait, 10) || 0;
+
+    const tick = () => {
+        if (remaining <= 0) {
+            btn.disabled = false;
+            msg.textContent = 'Puoi continuare.';
+            hidden.value = '1';
+            badge.textContent = '00:00';
+            clearInterval(iv);
+        } else {
+            msg.textContent = `Per favore leggi bene le istruzioni. Puoi continuare tra ${remaining}s.`;
+            badge.textContent = fmt(remaining);
+            remaining -= 1;
+        }
+    };
+
+    tick(); // initial paint
+    const iv = setInterval(tick, 1000);
+});
+</script>
 
 {% endblock %}
