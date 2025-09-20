@@ -1,0 +1,11 @@
+{{ block title }}Welcome{{ endblock }}
+{{ block content }}
+  <p>
+    This study asks you to state how much you would be willing to pay (WTP) for AUR-themed items.
+    One item will be randomly selected for your final payoff and will be given to you for your participation.
+  </p>
+  <p>
+    {{ formfield 'consent' label='I consent to participate.' }}
+  </p>
+  {{ next_button }}
+{{ endblock }}

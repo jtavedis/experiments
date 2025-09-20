@@ -1,0 +1,153 @@
+{% extends "otree/Page.html" %}
+{% load otree %}
+
+{% block title %}Instructions{% endblock %}
+
+{% block content %}
+
+<!-- Top-right timer badge -->
+<div id="timer_badge" aria-live="polite" role="timer">05:00</div>
+
+<p>Please read these instructions carefully. You will be able to continue after <strong>5 minutes</strong>.</p>
+
+<hr>
+
+<h4>Overview</h4>
+
+<p>
+In this exercise, you'll be asked to make choices that reflect your preferences between receiving a product or receiving money.
+</p>
+
+<p>
+To simulate a real business setting, we are using a mechanism commonly employed in focus groups and pricing studies.
+</p>
+
+<hr>
+
+<h4>Participation Fee</h4>
+
+<p>
+Each participant receives a hypothetical <strong>€5 participation fee</strong>. You won't see this in your payoff, but you should treat it as part of the scenario.
+</p>
+
+<hr>
+
+<h4>Prize Draw</h4>
+
+<p>
+At the end of the study, <strong>one participant</strong> will be randomly selected as the winner of a product offer.
+</p>
+
+<p>
+For the winner:
+<ul>
+    <li>One product is randomly selected.</li>
+    <li>A price is randomly drawn for that product.</li>
+    <li>If the price is <strong>less than or equal to</strong> your stated willingness to pay (WTP), you will receive the product.</li>
+    <li>If the price is <strong>higher than</strong> your WTP, you will receive a <strong>€10 gift card</strong> instead.</li>
+</ul>
+</p>
+
+<p>
+Everyone else receives only the hypothetical €5 participation fee.
+</p>
+
+<hr>
+
+<h4>How to State Your Preferences</h4>
+
+<p>
+For each product, you'll see a list of choices between:
+</p>
+<ul>
+    <li><strong>The product</strong>, and</li>
+    <li><strong>A cash amount</strong> (e.g., "Product <em>or</em> €10")</li>
+</ul>
+
+<p>
+For each row, choose the option you prefer. You may switch from choosing the product to choosing the cash amount as prices increase, but you should switch at most once.
+</p>
+
+<p>
+On the first row where you choose the cash, a dropdown will appear allowing you to specify a more precise value where you are indifferent between the two options.
+</p>
+
+<hr>
+
+<h4>Your Goal</h4>
+
+<p>
+Please answer honestly — as if the outcome will affect what you receive — because for one randomly chosen participant, it will.
+</p>
+
+<p>
+This exercise simulates how companies elicit willingness to pay for pricing decisions. Your choices help estimate how much value customers place on different products.
+</p>
+
+{% next_button %}
+
+<!-- Hidden form field for the timer gate -->
+<input type="hidden" name="passed_timer" value="0">
+
+<div id="timer_msg" style="margin-top:1rem;"></div>
+
+<style>
+  /* fixed timer chip in the top-right */
+  #timer_badge{
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      padding: 6px 10px;
+      font-weight: 600;
+      font-family: system-ui, sans-serif;
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      z-index: 1000;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const minWait = (window.js_vars && js_vars.min_wait) || 300;
+    const btn = document.querySelector('button[type="submit"], .otree-btn-next, input[type="submit"]');
+    const msg = document.getElementById('timer_msg');
+    const hidden = document.querySelector('input[name="passed_timer"]');
+    const badge = document.getElementById('timer_badge');
+
+    if (!btn) {
+        console.warn('Next button not found.');
+        return;
+    }
+
+    const fmt = s => {
+        const m = Math.floor(s / 60);
+        const r = s % 60;
+        return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
+    };
+
+    btn.disabled = true;
+    let remaining = parseInt(minWait, 10) || 0;
+
+    const tick = () => {
+        if (remaining <= 0) {
+            btn.disabled = false;
+            msg.textContent = 'You may continue.';
+            hidden.value = '1';
+            badge.textContent = '00:00';
+            clearInterval(iv);
+        } else {
+            msg.textContent = `Please read carefully. You can continue in ${remaining}s.`;
+            badge.textContent = fmt(remaining);
+            remaining -= 1;
+        }
+    };
+
+    badge.textContent = fmt(remaining);
+    tick();
+    const iv = setInterval(tick, 1000);
+});
+</script>
+
+{% endblock %}

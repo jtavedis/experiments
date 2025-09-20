@@ -1,0 +1,7 @@
+{{ block title }}Done!{{ endblock }}
+{{ block content }}
+  <p>Thanks for participating.</p>
+  {% if C.ENDOWMENT != 0 %}
+    <p>Your payoff will appear on the completion screen and in the admin data export.</p>
+  {% endif %}
+{{ endblock }}

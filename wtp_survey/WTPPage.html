@@ -1,0 +1,170 @@
+{% load static %}
+{{ block title }}How much are you willing to pay for these items?{{ endblock }}
+{{ block content }}
+  <p>
+    For each <strong>row</strong>, choose whether you prefer the <em>Product</em> or a sure <em>Cash</em> amount.
+    Your choices should switch from choosing the product to choosing cash at most once.
+    On the crossover row, use the <strong>Switch at:</strong> dropdown to pick a precise amount.
+  </p>
+
+  <style>
+    .item-card { border:1px solid #ddd; border-radius:8px; padding:16px; margin-bottom:24px; }
+    .price-grid { width:100%; border-collapse:collapse; }
+    .price-grid th, .price-grid td { border:1px solid #eee; padding:6px; text-align:center; }
+    .img { max-width:220px; height:auto; border-radius:8px; }
+    .leftcol { white-space:nowrap; }
+    .finecell { color:#a200a2; font-weight:600; }
+    .labelbuy { color:#0a6; }
+    .labelcash { color:#06c; }
+  </style>
+
+  {% for it in items %}
+    <div class="item-card">
+      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+        {% if it.image %}
+          <img class="img" src="{% static it.image %}" alt="{{ it.label }}" />
+        {% endif %}
+        <div style="flex:1; min-width:320px;">
+          <h3>{{ it.label }}</h3>
+
+          <table class="price-grid">
+            <thead>
+              <tr>
+                <th>Row</th>
+                <th class="leftcol">Product</th>
+                <th>Select</th>
+                <th>Cash Payoff</th>
+                <th class="finecell">Switch at:</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in it.rows %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td class="leftcol"><span class="labelbuy">Product</span></td>
+                  <td>
+                    <!-- 1 = Product, 0 = Cash -->
+                    <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="1"> Product</label>
+                    &nbsp;or&nbsp;
+                    <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="0"> Cash</label>
+                  </td>
+                  <td><span class="labelcash">${{ row.p_str }}</span></td>
+                  <td class="finecell">
+                    <select id="fine_{{ it.slug }}_{{ forloop.counter0 }}" style="display:none;"></select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <!-- Hidden fields captured on submit -->
+          <input type="hidden" name="choices_{{ it.slug }}" id="choices_{{ it.slug }}">
+          <input type="hidden" name="fine_{{ it.slug }}" id="fine_hidden_{{ it.slug }}">
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <script>
+    function round2(x){ return Math.round(x * 100) / 100; }
+
+    function fillFineSelect(selectEl, lower, upper, step){
+      if(!selectEl) return;
+      selectEl.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Please Select';
+      selectEl.appendChild(placeholder);
+      const l = Math.round(lower*100), u = Math.round(upper*100), s = Math.max(1, Math.round(step*100));
+      for(let cents=l; cents<=u; cents+=s){
+        const val = (cents/100).toFixed(2);
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = '$' + val;
+        selectEl.appendChild(opt);
+      }
+    }
+
+    {% for it in items %}
+      (function(){
+        const slug = "{{ it.slug }}";
+        // numeric grid for JS (already rounded server-side)
+        const grid = [ {% for row in it.rows %} {{ row.p }}, {% endfor %} ];
+        const n = grid.length;
+        const fineStep = {{ it.fine_step }};
+
+        function readRowChoice(i){
+          const name = `row_${slug}_${i}`;
+          const yes = document.querySelector(`input[name='${name}'][value='1']`);
+          const no  = document.querySelector(`input[name='${name}'][value='0']`);
+          if (yes && yes.checked) return 1;
+          if (no && no.checked) return 0;
+          return null;
+        }
+
+        function serialize(){
+          let arr = [];
+          let seenZero = false;
+          for (let i=0;i<n;i++){
+            let v = readRowChoice(i);
+            if (v === null) v = 0;
+            if (seenZero && v === 1) v = 0;
+            if (v === 0) seenZero = true;
+            arr.push(v);
+          }
+          document.getElementById(`choices_${slug}`).value = arr.join(',');
+          return arr;
+        }
+
+        function firstCashIndex(arr){
+          for (let i=0;i<arr.length;i++){ if (arr[i] === 0) return i; }
+          return null;
+        }
+
+        function hideAllFine(){
+          for (let i=0;i<n;i++){
+            const sel = document.getElementById(`fine_${slug}_${i}`);
+            if (sel){ sel.style.display = 'none'; sel.innerHTML = ''; }
+          }
+        }
+
+        function updateFine(){
+          const arr = serialize();
+          hideAllFine();
+
+          const idx = firstCashIndex(arr);
+          if (idx === null){
+            // all Product: set fine to top of grid
+            document.getElementById(`fine_hidden_${slug}`).value = String(round2(grid[n-1]));
+            return;
+          }
+          const lower = (idx === 0) ? 0 : grid[idx-1];
+          const upper = grid[idx];
+          const sel = document.getElementById(`fine_${slug}_${idx}`);
+          if (sel){
+            fillFineSelect(sel, round2(lower), round2(upper), fineStep);
+            sel.style.display = '';
+            sel.onchange = function(){
+              document.getElementById(`fine_hidden_${slug}`).value = this.value;
+            };
+          }
+        }
+
+        for (let i=0;i<n;i++){
+          const name = `row_${slug}_${i}`;
+          const yes = document.querySelector(`input[name='${name}'][value='1']`);
+          const no  = document.querySelector(`input[name='${name}'][value='0']`);
+          if (yes) yes.addEventListener('change', updateFine);
+          if (no)  no.addEventListener('change', updateFine);
+        }
+
+        const form = document.querySelector('form');
+        if (form){ form.addEventListener('submit', function(){ serialize(); }); }
+
+        updateFine();
+      })();
+    {% endfor %}
+  </script>
+
+  {{ next_button }}
+{{ endblock }}

@@ -1,0 +1,12 @@
+{{ block title }}Your Stated WTPs{{ endblock }}
+{{ block content }}
+  <table class="table">
+    <thead><tr><th>Item</th><th>WTP</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+        <tr><td>{{ r.label }}</td><td>{{ r.wtp }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {{ next_button }}
+{{ endblock }}
