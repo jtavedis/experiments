@@ -62,7 +62,12 @@ class Introduction(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        return dict(participant_id=player.id_in_group)
+        session_size = len(player.subsession.get_players())
+        return dict(
+            participant_id=player.id_in_group,
+            num_players=session_size
+        )
+
 
 
 class Guess(Page):
