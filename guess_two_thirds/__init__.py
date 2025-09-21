@@ -11,16 +11,24 @@ See https://en.wikipedia.org/wiki/Guess_2/3_of_the_average
 
 class C(BaseConstants):
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 50
+    # Upper bound (we'll stop early based on session.config['rounds'])
+    NUM_ROUNDS = 5
     NAME_IN_URL = 'guess_two_thirds'
     JACKPOT = cu(100)
     GUESS_MAX = 100
 
 
+# ---- Helper: read the admin-entered "rounds" value ----
+def max_rounds(session):
+    # If 'rounds' is not provided, fall back to C.NUM_ROUNDS
+    return session.config.get('rounds', C.NUM_ROUNDS)
+
+
 class Subsession(BaseSubsession):
     def creating_session(subsession):
+        # Put all players into one single group each round
         players = subsession.get_players()
-        subsession.set_group_matrix([players])  # Put all players into one single group
+        subsession.set_group_matrix([players])
 
 
 class Group(BaseGroup):
@@ -36,7 +44,7 @@ class Player(BasePlayer):
     is_winner = models.BooleanField(initial=False)
 
 
-# FUNCTIONS
+# ---- FUNCTIONS ----
 def set_payoffs(group: Group):
     players = group.get_players()
     guesses = [p.guess for p in players]
@@ -54,11 +62,12 @@ def two_thirds_avg_history(group: Group):
     return [g.two_thirds_avg for g in group.in_previous_rounds()]
 
 
-# PAGES
+# ---- PAGES ----
 class Introduction(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == 1
+        # Only show once, and only if within the chosen rounds
+        return player.round_number == 1 and player.round_number <= max_rounds(player.session)
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -69,38 +78,48 @@ class Introduction(Page):
         )
 
 
-
 class Guess(Page):
     form_model = 'player'
     form_fields = ['guess']
 
     @staticmethod
+    def is_displayed(player: Player):
+        # Respect the admin-entered number of rounds
+        return player.round_number <= max_rounds(player.session)
+
+    @staticmethod
     def vars_for_template(player: Player):
         group = player.group
-
         return dict(two_thirds_avg_history=two_thirds_avg_history(group))
 
 
 class ResultsWaitPage(WaitPage):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number <= max_rounds(player.session)
+
     after_all_players_arrive = set_payoffs
 
 
-def max_rounds(session):
-    return session.config.get('rounds', C.NUM_ROUNDS)
-
 class Results(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number <= max_rounds(player.session)
+
     @staticmethod
     def vars_for_template(player: Player):
         group = player.group
         sorted_guesses = sorted(p.guess for p in group.get_players())
-        return dict(sorted_guesses=sorted_guesses, participant_id=player.id_in_group)
+        return dict(
+            sorted_guesses=sorted_guesses,
+            participant_id=player.id_in_group
+        )
 
     @staticmethod
     def app_after_this_page(player: Player, upcoming_apps):
         # End the app once we reach the selected number of rounds
         if player.round_number >= max_rounds(player.session):
             return upcoming_apps[0] if upcoming_apps else None
-
 
 
 page_sequence = [Introduction, Guess, ResultsWaitPage, Results]

@@ -6,8 +6,8 @@ SESSION_CONFIGS = [
     dict(
         name='guess_two_thirds',
         app_sequence=['guess_two_thirds'],
-        num_demo_participants=6,
-        rounds=5,  # default; you can change this in the admin when creating each session
+        num_demo_participants=3,
+        rounds=3,
     ),
     dict(
         name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
