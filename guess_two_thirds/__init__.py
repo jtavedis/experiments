@@ -10,15 +10,17 @@ See https://en.wikipedia.org/wiki/Guess_2/3_of_the_average
 
 
 class C(BaseConstants):
-    PLAYERS_PER_GROUP = 23
-    NUM_ROUNDS = 3
+    PLAYERS_PER_GROUP = None
+    NUM_ROUNDS = 1
     NAME_IN_URL = 'guess_two_thirds'
     JACKPOT = cu(100)
     GUESS_MAX = 100
 
 
 class Subsession(BaseSubsession):
-    pass
+    def creating_session(subsession):
+        players = subsession.get_players()
+        subsession.set_group_matrix([players])  # Put all players into one single group
 
 
 class Group(BaseGroup):
