@@ -60,6 +60,10 @@ class Introduction(Page):
     def is_displayed(player: Player):
         return player.round_number == 1
 
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(participant_id=player.id_in_group)
+
 
 class Guess(Page):
     form_model = 'player'
@@ -80,9 +84,11 @@ class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
         group = player.group
-
         sorted_guesses = sorted(p.guess for p in group.get_players())
-        return dict(sorted_guesses=sorted_guesses)
+        return dict(
+            sorted_guesses=sorted_guesses,
+            participant_id=player.id_in_group
+        )
 
 
 page_sequence = [Introduction, Guess, ResultsWaitPage, Results]
