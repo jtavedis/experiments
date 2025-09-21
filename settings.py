@@ -18,6 +18,15 @@ SESSION_CONFIGS = [
         num_demo_participants=4,
         app_sequence=['pgg'],
     ),
+    dict(
+        name='guess_two_thirds',
+        display_name="Guess 2/3 of the Average",
+        app_sequence=['guess_two_thirds'],
+        num_demo_participants=2,
+    ),
+    dict(
+        name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs

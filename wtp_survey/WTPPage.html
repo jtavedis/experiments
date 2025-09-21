@@ -8,56 +8,127 @@
   </p>
 
   <style>
-    .item-card { border:1px solid #ddd; border-radius:8px; padding:16px; margin-bottom:24px; }
-    .price-grid { width:100%; border-collapse:collapse; }
-    .price-grid th, .price-grid td { border:1px solid #eee; padding:6px; text-align:center; }
-    .img { max-width:220px; height:auto; border-radius:8px; }
-    .leftcol { white-space:nowrap; }
-    .finecell { color:#a200a2; font-weight:600; }
-    .labelbuy { color:#0a6; }
-    .labelcash { color:#06c; }
+    .item-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .price-grid-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .price-grid {
+      width: 100%;
+      min-width: 500px;
+      border-collapse: collapse;
+    }
+
+    .price-grid th, .price-grid td {
+      border: 1px solid #eee;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .leftcol {
+      white-space: nowrap;
+    }
+
+    .finecell {
+      color: #a200a2;
+      font-weight: 600;
+    }
+
+    .labelbuy {
+      color: #0a6;
+    }
+
+    .labelcash {
+      color: #06c;
+    }
+
+    input[type="radio"], select {
+      transform: scale(1.2);
+      margin: 6px;
+    }
+
+    @media (min-width: 600px) {
+      .item-layout {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .item-info {
+        flex: 1;
+        min-width: 320px;
+      }
+    }
+
+    @media (max-width: 599px) {
+      .item-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .item-info {
+        width: 100%;
+      }
+    }
   </style>
 
   {% for it in items %}
     <div class="item-card">
-      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div class="item-layout">
         {% if it.image %}
           <img class="img" src="{% static it.image %}" alt="{{ it.label }}" />
         {% endif %}
-        <div style="flex:1; min-width:320px;">
+        <div class="item-info">
           <h3>{{ it.label }}</h3>
 
-          <table class="price-grid">
-            <thead>
-              <tr>
-                <th>Row</th>
-                <th class="leftcol">Product</th>
-                <th>Select</th>
-                <th>Cash Payoff</th>
-                <th class="finecell">Switch at:</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in it.rows %}
+          <div class="price-grid-wrapper">
+            <table class="price-grid">
+              <thead>
                 <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td class="leftcol"><span class="labelbuy">Product</span></td>
-                  <td>
-                    <!-- 1 = Product, 0 = Cash -->
-                    <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="1"> Product</label>
-                    &nbsp;or&nbsp;
-                    <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="0"> Cash</label>
-                  </td>
-                  <td><span class="labelcash">${{ row.p_str }}</span></td>
-                  <td class="finecell">
-                    <select id="fine_{{ it.slug }}_{{ forloop.counter0 }}" style="display:none;"></select>
-                  </td>
+                  <th>Row</th>
+                  <th class="leftcol">Product</th>
+                  <th>Select</th>
+                  <th>Cash Payoff</th>
+                  <th class="finecell">Switch at:</th>
                 </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for row in it.rows %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="leftcol"><span class="labelbuy">Product</span></td>
+                    <td>
+                      <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="1"> Product</label>
+                      &nbsp;or&nbsp;
+                      <label><input type="radio" name="row_{{ it.slug }}_{{ forloop.counter0 }}" value="0"> Cash</label>
+                    </td>
+                    <td><span class="labelcash">${{ row.p_str }}</span></td>
+                    <td class="finecell">
+                      <select id="fine_{{ it.slug }}_{{ forloop.counter0 }}" style="display:none;"></select>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
 
-          <!-- Hidden fields captured on submit -->
           <input type="hidden" name="choices_{{ it.slug }}" id="choices_{{ it.slug }}">
           <input type="hidden" name="fine_{{ it.slug }}" id="fine_hidden_{{ it.slug }}">
         </div>
@@ -88,7 +159,6 @@
     {% for it in items %}
       (function(){
         const slug = "{{ it.slug }}";
-        // numeric grid for JS (already rounded server-side)
         const grid = [ {% for row in it.rows %} {{ row.p }}, {% endfor %} ];
         const n = grid.length;
         const fineStep = {{ it.fine_step }};
@@ -134,7 +204,6 @@
 
           const idx = firstCashIndex(arr);
           if (idx === null){
-            // all Product: set fine to top of grid
             document.getElementById(`fine_hidden_${slug}`).value = String(round2(grid[n-1]));
             return;
           }
