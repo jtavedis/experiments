@@ -44,10 +44,10 @@ class Player(BasePlayer):
 
     attn_check = models.StringField(
         choices=[
-            "I receive the hoodie",
-            "I receive the €10 gift card",
-            "I receive both the hoodie and €35",
-            "Nothing happens unless I am the selected winner",
+            "If the random price is ≤ my WTP, I receive the product; otherwise I receive nothing.",
+            "I receive the hoodie regardless of price.",
+            "I receive both the hoodie and €35.",
+            "Nothing happens for anyone; it is just hypothetical."
         ],
         label="",
         blank=True,
@@ -102,6 +102,7 @@ def creating_session(subsession: Subsession):
 
 
 def set_payoff(player: Player):
+    # Only the randomly chosen winner is realized
     if not player.participant.vars.get('is_winner'):
         player.payoff = cu(0)
         player.participant.vars['reward'] = 'none'
@@ -111,12 +112,14 @@ def set_payoff(player: Player):
     rand_price = player.participant.vars.get('random_price')
     wtp_field = getattr(player, f"wtp_{sel_slug}", cu(0))
 
+    # Pure BDM: buy at the random price if WTP >= price; else nothing
     if wtp_field >= rand_price:
         player.participant.vars['reward'] = 'product'
     else:
-        player.participant.vars['reward'] = 'gift_card'
+        player.participant.vars['reward'] = 'none'
 
-    player.payoff = cu(0)  # Hypothetical reward only
+    player.payoff = cu(0)  # still hypothetical in your setup
+
 
 
 def custom_export(players):
@@ -173,7 +176,7 @@ class Comprehension(Page):
 
     @staticmethod
     def error_message(player: Player, values):
-        if values['attn_check'] != "I receive the hoodie":
+        if values['attn_check'] != "If the random price is ≤ my WTP, I receive the product; otherwise I receive nothing.":
             return "That's not correct. Please review the instructions and try again."
 
 

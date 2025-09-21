@@ -11,7 +11,7 @@ See https://en.wikipedia.org/wiki/Guess_2/3_of_the_average
 
 class C(BaseConstants):
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 50
     NAME_IN_URL = 'guess_two_thirds'
     JACKPOT = cu(100)
     GUESS_MAX = 100
@@ -85,15 +85,22 @@ class ResultsWaitPage(WaitPage):
     after_all_players_arrive = set_payoffs
 
 
+def max_rounds(session):
+    return session.config.get('rounds', C.NUM_ROUNDS)
+
 class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
         group = player.group
         sorted_guesses = sorted(p.guess for p in group.get_players())
-        return dict(
-            sorted_guesses=sorted_guesses,
-            participant_id=player.id_in_group
-        )
+        return dict(sorted_guesses=sorted_guesses, participant_id=player.id_in_group)
+
+    @staticmethod
+    def app_after_this_page(player: Player, upcoming_apps):
+        # End the app once we reach the selected number of rounds
+        if player.round_number >= max_rounds(player.session):
+            return upcoming_apps[0] if upcoming_apps else None
+
 
 
 page_sequence = [Introduction, Guess, ResultsWaitPage, Results]

@@ -1,5 +1,5 @@
 {% extends "otree/Page.html" %}
-{% load otree %}
+{% load otree static %}
 
 {% block title %}Your Outcome{% endblock %}
 
@@ -12,22 +12,22 @@
   <p>The product selected for you was:</p>
   <div style="margin: 1em 0;">
     <strong>{{ item.label }}</strong><br>
-    <img src="{{ static item.image }}" alt="{{ item.label }}" style="max-width: 200px;">
+    <img src="{% static item.image %}" alt="{{ item.label }}" style="max-width: 200px;">
   </div>
 
-  <p>Your stated willingness to pay (WTP): <strong>€{{ wtp }}</strong></p>
-  <p>The randomly drawn price: <strong>€{{ random_price }}</strong></p>
+  <p>Your stated willingness to pay (WTP): <strong>{{ wtp|c }}</strong></p>
+  <p>The randomly drawn price: <strong>{{ random_price|c }}</strong></p>
 
   {% if will_buy %}
     <p>Because your WTP is greater than or equal to the price, you receive the product.</p>
   {% else %}
-    <p>Because your WTP is lower than the price, you receive a €10 gift card instead.</p>
+    <p>Because your WTP is lower than the price, you do not receive the product, and no other prize is given.</p>
   {% endif %}
 
 {% else %}
 
   <p>You were <strong>not selected</strong> as the winner in this round.</p>
-  <p>However, you received a hypothetical participation fee of €5, as described in the instructions.</p>
+  <p>As described in the instructions, the participation fee is hypothetical and unrelated to outcomes.</p>
   <p>Thank you for your thoughtful participation!</p>
 
 {% endif %}

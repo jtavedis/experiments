@@ -5,9 +5,9 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='guess_two_thirds',
-        display_name="Guess 2/3 of the Average",
         app_sequence=['guess_two_thirds'],
-        num_demo_participants=3,
+        num_demo_participants=6,
+        rounds=5,  # default; you can change this in the admin when creating each session
     ),
     dict(
         name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
