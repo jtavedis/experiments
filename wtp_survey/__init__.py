@@ -25,7 +25,7 @@ class C(BaseConstants):
     ]
 
     ENDOWMENT = cu(0)
-    MIN_WAIT = 10  # seconds on Instructions page
+    MIN_WAIT = 180  # seconds on Instructions page
 
 def price_grid(item):
     return item['coarse_prices']
