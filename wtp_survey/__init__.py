@@ -10,14 +10,14 @@ class C(BaseConstants):
     ITEMS = [
         dict(
             slug='pastel_pink_tshirt',
-            label='Pastel Pink T-Shirt (AUR)',
+            label='AUR Pastel Pink T-Shirt (Unisex)',
             image='wtp_survey/pastel_pink_tshirt.jpg',
             coarse_prices=[0, 5, 10, 15, 20, 25, 30, 35, 40],
             fine_step=0.50,
         ),
         dict(
             slug='grey_hoodie',
-            label='Grey Hoodie (AUR)',
+            label='AUR Grey Hoodie (Unisex)',
             image='wtp_survey/grey_hoodie.jpg',
             coarse_prices=[0, 10, 20, 30, 40, 50, 60, 70, 80],
             fine_step=1.00,
