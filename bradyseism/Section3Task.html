@@ -1,0 +1,30 @@
+{{ block title }}Sezione 3 - Decisione{{ endblock }}
+
+{{ block content }}
+<div style="max-width: 700px; margin: 0 auto;">
+
+    <h2>SEZIONE 3: La Tua Decisione</h2>
+    
+    <div style="display: flex; gap: 20px; margin: 20px 0;">
+        <div style="flex: 1; padding: 15px; background-color: #d4edda; border-radius: 5px;">
+            <h4>Urna A</h4>
+            <p>50 rosse, 50 nere</p>
+            <p><em>(Composizione nota)</em></p>
+        </div>
+        <div style="flex: 1; padding: 15px; background-color: #fff3cd; border-radius: 5px;">
+            <h4>Urna B</h4>
+            <p>100 palline rosse e nere</p>
+            <p><em>(Composizione sconosciuta)</em></p>
+        </div>
+    </div>
+    
+    <p style="text-align: center;"><strong>Se estrai una pallina ROSSA, vinci 100€</strong></p>
+    
+    <div style="padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin: 20px 0;">
+        {{ formfields }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

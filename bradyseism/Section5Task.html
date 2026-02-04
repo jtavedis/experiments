@@ -1,0 +1,20 @@
+{{ block title }}Sezione 5 - Decisione{{ endblock }}
+
+{{ block content }}
+<div style="max-width: 750px; margin: 0 auto;">
+
+    <h2>SEZIONE 5: La Tua Decisione</h2>
+    
+    <div style="padding: 15px; background-color: #fff3cd; border-radius: 5px; margin-bottom: 20px;">
+        <p><strong>Budget: 300€</strong> | <strong>Soglia fondo comune: 600€</strong></p>
+        <p>Numeri sicuri: {{ safe_number }} | Numeri a rischio: {{ disaster_numbers }}</p>
+    </div>
+    
+    <div style="padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin: 20px 0;">
+        {{ formfields }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

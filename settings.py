@@ -12,13 +12,37 @@ SESSION_CONFIGS = [
     dict(
         name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
     ),
-        dict(
+    dict(
         name='pgg',        # must match app folder
         display_name="pgg",
         num_demo_participants=4,
         app_sequence=['pgg'],
     ),
+    dict(
+        name='bradyseism',
+        display_name='Studio Bradisismo - Campi Flegrei',
+        app_sequence=['bradyseism'],
+        num_demo_participants=10,
+    ),
 ]
+
+# ---- Rooms (single public link + unique seats) ----
+ROOMS = [
+    dict(
+        name='ECO_212',
+        display_name='ECO 212 Lobby',
+        participant_label_file='_rooms/eco212_labels.txt',
+        # Optional: uncomment if you want to tag sessions created from this room
+        # use_secure_urls=False,
+    ),
+    dict(
+        name='bradyseism',
+        display_name='Studio Campi Flegrei',
+        participant_label_file='_rooms/participant_labels.txt',
+        use_secure_urls=True,
+    ),
+]
+
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
@@ -39,7 +63,7 @@ LANGUAGE_CODE = 'en'
 # e.g. EUR, GBP, CNY, JPY
 REAL_WORLD_CURRENCY_CODE = 'EUR'
 USE_POINTS = True
-POINTS_CUSTOM_NAME = 'punti'
+POINTS_CUSTOM_NAME = 'points'
 
 ADMIN_USERNAME = 'admin'
 # for security, best to set admin password in an environment variable

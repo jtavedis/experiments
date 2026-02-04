@@ -1,0 +1,54 @@
+{{ block title }}Questionario (5/5){{ endblock }}
+
+{{ block content }}
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <h2>Questionario Finale (continua)</h2>
+    
+    <p>Rispondi alle seguenti domande su una scala da 1 (mai) a 5 (molto spesso):</p>
+    <p><em>1: mai; 2: quasi mai; 3: qualche volta; 4: spesso; 5: molto spesso</em></p>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_upset" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_unable_control" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_nervous" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_confident" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_going_well" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_could_not_cope" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_control_irritations" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_on_top" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_angered" }}
+    </div>
+    
+    <div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+        {{ formfield "pss_difficulties_piling" }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

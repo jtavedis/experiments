@@ -1,0 +1,23 @@
+{{ block title }}Questionario (2/5){{ endblock }}
+
+{{ block content }}
+<div style="max-width: 750px; margin: 0 auto;">
+
+    <h2>Questionario Finale (continua)</h2>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        {{ formfield "trust_general" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        {{ formfield "time_preference" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        {{ formfield "risk_self_report" }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

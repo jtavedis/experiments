@@ -1,0 +1,54 @@
+{{ block title }}Parte II - Sezione 6{{ endblock }}
+
+{{ block content }}
+<div style="max-width: 750px; margin: 0 auto;">
+
+    <h2>SEZIONE 6</h2>
+    
+    <p>In questa sezione, come nelle precedenti, fai parte di un <strong>gruppo di 4 persone</strong> 
+    e hai un budget di <strong>300 euro</strong>.</p>
+    
+    <p>Anche in questa sezione gli euro accumulati nel fondo comune sono la somma di quelli 
+    trasferiti da tutti i componenti del gruppo, e la soglia per evitare il disastro è sempre 
+    <strong>600 euro</strong>.</p>
+    
+    <div style="padding: 15px; background-color: #f8d7da; border-radius: 5px; margin: 20px 0;">
+        <h3>⚠️ La Differenza Importante</h3>
+        <p>In questa sezione, <strong>non conosci quali numeri sono "sicuri" e quali sono "a rischio"</strong>.</p>
+        <p>Sai solo che:</p>
+        <ul>
+            <li>Verrà estratto un numero da 1 a 10</li>
+            <li>Alcuni numeri sono sicuri (come nelle sezioni precedenti)</li>
+            <li>Per gli altri numeri, se il fondo comune è sotto 600€, perdi tutto</li>
+        </ul>
+        <p><strong>Ma non sai quanti numeri sono sicuri e quanti sono a rischio.</strong></p>
+    </div>
+    
+    <h3>Riassunto</h3>
+    
+    <table class="table table-bordered" style="margin: 20px 0;">
+        <thead style="background-color: #e9ecef;">
+            <tr>
+                <th>Numero estratto</th>
+                <th>Fondo comune ≥ 600€</th>
+                <th>Fondo comune < 600€</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Numero "sicuro" (non sai quali)</td>
+                <td style="color: green;">Salvi gli euro trattenuti</td>
+                <td style="color: green;">Salvi gli euro trattenuti</td>
+            </tr>
+            <tr>
+                <td>Numero "a rischio" (non sai quali)</td>
+                <td style="color: green;">Salvi gli euro trattenuti</td>
+                <td style="color: red;">Perdi tutto</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

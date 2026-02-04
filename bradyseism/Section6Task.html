@@ -1,0 +1,45 @@
+{{ block title }}Sezione 6 - Decisione{{ endblock }}
+
+{{ block content }}
+<div style="max-width: 750px; margin: 0 auto;">
+
+    <h2>SEZIONE 6: La Tua Decisione</h2>
+    
+    <div style="padding: 15px; background-color: #d1ecf1; border-radius: 5px; margin-bottom: 20px;">
+        <p><strong>Budget: 300€</strong> | <strong>Soglia fondo comune: 600€</strong></p>
+        <p><strong>Probabilità di disastro: SCONOSCIUTA</strong></p>
+    </div>
+    
+    <div style="padding: 20px; background-color: #f8f9fa; border-radius: 5px; margin: 20px 0;">
+        <h4>La tua decisione</h4>
+        {{ formfield "contribution_ambiguous" }}
+    </div>
+    
+    <hr>
+    
+    <h4>Le tue aspettative</h4>
+    
+    <p><em>Indica un numero da 0 a 300 per ciascuna domanda:</em></p>
+    
+    <div style="padding: 15px; background-color: #f0f0f0; border-radius: 5px; margin: 15px 0;">
+        <p><strong>Secondo te, quanti euro dovrebbero trasferire in media al fondo comune 
+        i quattro membri del tuo gruppo, te compreso?</strong></p>
+        {{ formfield "belief_personal_amb" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f0f0f0; border-radius: 5px; margin: 15px 0;">
+        <p><strong>Secondo te, quanti euro di fatto trasferiranno in media al fondo comune 
+        gli altri tre membri del tuo gruppo?</strong></p>
+        {{ formfield "belief_empirical_amb" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f0f0f0; border-radius: 5px; margin: 15px 0;">
+        <p><strong>Secondo te, quanti euro gli altri tre membri del gruppo pensano che voi 
+        quattro, in media, dovreste trasferire al fondo comune?</strong></p>
+        {{ formfield "belief_normative_amb" }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}

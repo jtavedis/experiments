@@ -1,0 +1,31 @@
+{{ block title }}Esperienza con il Bradisismo{{ endblock }}
+
+{{ block content }}
+<div style="max-width: 700px; margin: 0 auto;">
+
+    <h2>La Tua Esperienza con il Bradisismo</h2>
+    
+    <p>Poiché vivi nell'area dei Campi Flegrei, vorremmo farti alcune domande 
+    sulla tua esperienza con il fenomeno del bradisismo.</p>
+    
+    <hr>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        {{ formfield "years_in_area" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        <p><strong>Crisi 1982-1984</strong></p>
+        <p style="font-size: 0.9em; color: #666;">La crisi bradisismica del 1982-1984 causò un sollevamento del suolo 
+        di circa 1.8 metri e l'evacuazione di circa 40,000 persone da Pozzuoli.</p>
+        {{ formfield "experienced_1982" }}
+    </div>
+    
+    <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; margin: 15px 0;">
+        {{ formfield "experienced_evacuation" }}
+    </div>
+
+</div>
+
+{{ next_button }}
+{{ endblock }}
