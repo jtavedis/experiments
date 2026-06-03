@@ -1,0 +1,195 @@
+{{ block title }}Round {{ player.round_number }} — Play Your Cards{{ endblock }}
+
+{{ block styles }}
+<style>
+  .phase-pill {
+    display: inline-block;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+  .phase-standard { background: #e8f4fd; color: #1a6090; border: 1px solid #bee0f5; }
+  .phase-risk     { background: #fdecea; color: #922; border: 1px solid #f5c2bd; }
+
+  .hand-wrap {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 1.5rem 0 .5rem;
+  }
+  .hand-card {
+    cursor: pointer;
+    user-select: none;
+    width: 110px;
+    height: 165px;
+    border-radius: 14px;
+    border: 4px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    color: #fff;
+    font-family: Georgia, serif;
+    box-shadow: 3px 4px 12px rgba(0,0,0,.30);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    position: relative;
+  }
+  .hand-card:hover { transform: translateY(-6px); box-shadow: 4px 10px 20px rgba(0,0,0,.40); }
+  .hand-card.red-card   { background: #c0392b; }
+  .hand-card.black-card { background: #1a1a2e; }
+  .hand-card.selected {
+    border-color: #ffc107;
+    transform: translateY(-12px);
+    box-shadow: 0 16px 28px rgba(0,0,0,.50);
+  }
+  .hand-card .check {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 1.1rem;
+    opacity: 0;
+  }
+  .hand-card.selected .check { opacity: 1; }
+  .card-suit { font-size: 1.8rem; line-height: 1; }
+  .card-word { font-size: .85rem; font-weight: 700; letter-spacing: .1em; }
+  .card-foot { font-size: .7rem; opacity: .85; }
+
+  #submit-btn { display: none; margin: 0 auto; }
+  #submit-btn.visible { display: block; }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<!-- Phase indicator -->
+<div class="text-center mb-2">
+  {% if phase == 1 %}
+    <span class="phase-pill phase-standard">Phase 1 — Standard (Rounds 1–4)</span>
+  {% elif phase == 2 %}
+    <span class="phase-pill phase-risk">Phase 2 — {{ risk_pct }}% Risk (Rounds 5–8)</span>
+  {% else %}
+    <span class="phase-pill phase-risk">Phase 3 — {{ risk_pct }}% Risk (Rounds 9–12)</span>
+  {% endif %}
+</div>
+
+<p class="text-center text-muted">
+  You hold 2 red and 2 black cards. <strong>Play exactly 2</strong> onto the stack;
+  you keep the other 2. Each red card you <strong>keep</strong> earns you
+  <strong>${{ dollars_per_red_kept }}</strong>; each red card placed on the stack
+  earns <strong>everyone $1</strong>.
+</p>
+
+{% if risky %}
+<div class="alert alert-warning text-center py-2">
+  ⚠️ This round: if the class places fewer than
+  <strong>{{ threshold_n }}</strong> red cards on the stack, there is a
+  <strong>{{ risk_pct }}%</strong> chance everyone earns $0.
+</div>
+{% endif %}
+
+<p class="text-center fw-bold mb-0">Select the two cards you will play onto the stack:</p>
+
+<!-- oTree auto-wraps page content in its own <form> -->
+<input type="hidden" name="red_contributed" id="red-contributed-value" value="">
+
+<div class="hand-wrap">
+  <!-- Two red cards -->
+  <div class="hand-card red-card" data-color="red" onclick="toggleCard(this)">
+    <span class="check">✓</span>
+    <span class="card-suit">♥</span>
+    <span class="card-word">RED</span>
+    <span class="card-foot">keep = ${{ dollars_per_red_kept }}</span>
+  </div>
+  <div class="hand-card red-card" data-color="red" onclick="toggleCard(this)">
+    <span class="check">✓</span>
+    <span class="card-suit">♦</span>
+    <span class="card-word">RED</span>
+    <span class="card-foot">keep = ${{ dollars_per_red_kept }}</span>
+  </div>
+  <!-- Two black cards -->
+  <div class="hand-card black-card" data-color="black" onclick="toggleCard(this)">
+    <span class="check">✓</span>
+    <span class="card-suit">♠</span>
+    <span class="card-word">BLACK</span>
+    <span class="card-foot">keep = $0</span>
+  </div>
+  <div class="hand-card black-card" data-color="black" onclick="toggleCard(this)">
+    <span class="check">✓</span>
+    <span class="card-suit">♣</span>
+    <span class="card-word">BLACK</span>
+    <span class="card-foot">keep = $0</span>
+  </div>
+</div>
+
+<p id="hint-text" class="text-center text-muted small">
+  Click two cards to play them. Click again to deselect.
+</p>
+
+<div class="text-center">
+  <button type="submit" id="submit-btn" class="btn btn-lg btn-primary px-5">
+    Confirm →
+  </button>
+</div>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  var DOLLARS_PER_RED_KEPT = {{ dollars_per_red_kept }};
+
+  function selectedCards() {
+    return Array.prototype.slice.call(
+      document.querySelectorAll('.hand-card.selected'));
+  }
+
+  function toggleCard(el) {
+    var already = el.classList.contains('selected');
+    if (!already && selectedCards().length >= 2) {
+      // Already have 2 chosen; ignore extra clicks until one is deselected.
+      flashHint('You can only play 2 cards. Deselect one first.');
+      return;
+    }
+    el.classList.toggle('selected');
+    updateState();
+  }
+
+  function flashHint(msg) {
+    var h = document.getElementById('hint-text');
+    h.textContent = msg;
+  }
+
+  function updateState() {
+    var sel = selectedCards();
+    var btn = document.getElementById('submit-btn');
+    var field = document.getElementById('red-contributed-value');
+
+    if (sel.length === 2) {
+      var reds = sel.filter(function (c) { return c.dataset.color === 'red'; }).length;
+      field.value = reds;
+      var kept = 2 - reds;
+      flashHint('You will play ' + reds + ' red and ' + (2 - reds) +
+        ' black, keeping ' + kept + ' red ($' + (kept * DOLLARS_PER_RED_KEPT) +
+        ' from kept cards). Click Confirm or change your selection.');
+      btn.classList.add('visible');
+    } else {
+      field.value = '';
+      btn.classList.remove('visible');
+      if (sel.length === 1) {
+        flashHint('Select one more card (2 total).');
+      } else {
+        flashHint('Click two cards to play them. Click again to deselect.');
+      }
+    }
+  }
+
+  document.querySelector('form').addEventListener('submit', function (e) {
+    if (selectedCards().length !== 2) {
+      e.preventDefault();
+      alert('Please select exactly two cards to play.');
+    }
+  });
+</script>
+{{ endblock }}

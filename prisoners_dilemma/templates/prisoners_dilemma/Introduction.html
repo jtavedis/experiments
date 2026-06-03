@@ -1,0 +1,98 @@
+{{ block title }}Welcome — Card Game Instructions{{ endblock }}
+
+{{ block content }}
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">How the game works</div>
+  <div class="card-body">
+    <p>
+      You will be <strong>matched with a partner</strong> and play a card game for
+      <strong>{{ C.NUM_ROUNDS }} rounds</strong>.
+      Your partner is the same person for all rounds.
+    </p>
+    <p>
+      Each round you will be shown two cards — a
+      <span class="badge" style="background:#dc3545;">RED</span> card and a
+      <span class="badge bg-dark">BLACK</span> card.
+      <strong>Choose one</strong> by clicking on it.
+      Both you and your partner choose at the same time, without seeing each other's choice.
+      Once both of you have chosen, the cards are revealed and your earnings for the round are calculated.
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-danger h-100">
+      <div class="card-header fw-bold text-danger">🔴 Playing the Red Card</div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Your earnings <strong>increase by $2</strong>.</li>
+          <li>Your partner's earnings are <strong>unchanged</strong> by your choice.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-dark h-100">
+      <div class="card-header fw-bold">⚫ Playing the Black Card</div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Your earnings are <strong>unchanged</strong> by your choice.</li>
+          <li>Your partner's earnings <strong>increase by $3</strong>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Payoff table — Rounds 1–5 </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle mb-0" style="max-width:420px;">
+        <thead class="table-light">
+          <tr>
+            <th style="width:35%"></th>
+            <th colspan="2">Partner plays…</th>
+          </tr>
+          <tr>
+            <th>You play…</th>
+            <th><span class="badge" style="background:#dc3545;">🔴 Red</span></th>
+            <th><span class="badge bg-dark">⚫ Black</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="badge" style="background:#dc3545;">🔴 Red</span></th>
+            <td>$2 / $2</td>
+            <td>$5 / $0</td>
+          </tr>
+          <tr>
+            <th><span class="badge bg-dark">⚫ Black</span></th>
+            <td>$0 / $5</td>
+            <td>$3 / $3</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="text-muted small mt-1 mb-0">Format: <em>Your earnings / Partner's earnings</em></p>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Structure</div>
+  <div class="card-body">
+    <ul class="mb-0">
+      <li><strong>Rounds 1–5</strong> — Payoffs are as described above.</li>
+      <li><strong>Rounds 6–10</strong> — Payoffs will change. You will see the new table before Round 6.</li>
+      <li>Your total earnings equal the sum across all 10 rounds.</li>
+      <li>All earnings are <strong>hypothetical</strong>.</li>
+    </ul>
+  </div>
+</div>
+
+<p class="text-muted small">Please do not discuss your choice with your partner until after you have both submitted your card.</p>
+
+{{ next_button }}
+{{ endblock }}

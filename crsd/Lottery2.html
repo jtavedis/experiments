@@ -1,0 +1,47 @@
+{{ block title }}Part 1 — Lottery 2{{ endblock }}
+
+{{ block content }}
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Lottery 2</div>
+  <div class="card-body">
+    <p>
+      You have an initial budget of <strong>600 euros</strong>. As before, there
+      are four tickets, numbered 1 to 4, inside a transparent urn. One ticket
+      will be drawn at random, each with an equal chance. Indicate how many
+      tickets you would buy. Each ticket costs 0 euros, but:
+    </p>
+
+    <ul>
+      <li>
+        <strong>Buy 1 ticket</strong> (ticket no. 1):
+        lose <strong>170 €</strong> if ticket 1 is drawn;
+        lose all <strong>600 €</strong> if a ticket from 2 to 4 is drawn.
+      </li>
+      <li>
+        <strong>Buy 2 tickets</strong> (tickets 1 and 2):
+        lose <strong>390 €</strong> if ticket 1 or 2 is drawn;
+        lose all <strong>600 €</strong> if a ticket from 3 or 4 is drawn.
+      </li>
+      <li>
+        <strong>Buy 3 tickets</strong> (tickets 1, 2, and 3):
+        lose <strong>463 €</strong> if a ticket from 1 to 3 is drawn;
+        lose all <strong>600 €</strong> if ticket 4 is drawn.
+      </li>
+      <li>
+        <strong>Buy 4 tickets</strong>:
+        lose exactly <strong>500 €</strong> regardless of which ticket is drawn.
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <p class="fw-bold mb-2">Indicate your decision:</p>
+    {{ formfields }}
+  </div>
+</div>
+
+{{ next_button }}
+{{ endblock }}

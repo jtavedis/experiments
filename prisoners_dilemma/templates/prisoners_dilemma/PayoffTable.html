@@ -1,0 +1,31 @@
+{# Reusable payoff matrix table.
+   Variables expected: rr, rb, br, bb
+   Each is a string like "$2 / $2"  (Your earnings / Partner's earnings) #}
+<div class="table-responsive">
+  <table class="table table-bordered text-center align-middle mb-0" style="max-width:420px;">
+    <thead class="table-light">
+      <tr>
+        <th style="width:35%"></th>
+        <th colspan="2">Partner plays…</th>
+      </tr>
+      <tr>
+        <th>You play…</th>
+        <th><span class="badge" style="background:#dc3545; font-size:.85rem;">🔴 Red</span></th>
+        <th><span class="badge bg-dark font-size:.85rem;">⚫ Black</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th><span class="badge" style="background:#dc3545;">🔴 Red</span></th>
+        <td>{{ rr }}</td>
+        <td>{{ rb }}</td>
+      </tr>
+      <tr>
+        <th><span class="badge bg-dark">⚫ Black</span></th>
+        <td>{{ br }}</td>
+        <td>{{ bb }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="text-muted small mt-1 mb-0">Format: <em>Your earnings / Partner's earnings</em></p>
+</div>

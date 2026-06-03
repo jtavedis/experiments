@@ -1,0 +1,89 @@
+{{ block title }}Round {{ player.round_number }} — The Draw{{ endblock }}
+
+{{ block styles }}
+<style>
+  .reveal-box { text-align: center; margin: 2rem auto; max-width: 520px; }
+  .roller {
+    font-family: Georgia, serif;
+    font-size: 6rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 1.5rem 0;
+    color: #1a1a2e;
+    min-height: 6rem;
+  }
+  .roller.rolling { color: #999; }
+  .roller.done-safe   { color: #1e7e34; }
+  .roller.done-wipe   { color: #c0392b; }
+  .verdict { font-size: 1.4rem; font-weight: 700; opacity: 0; transition: opacity .4s ease; }
+  .verdict.show { opacity: 1; }
+  #reveal-next { display: none; }
+  #reveal-next.show { display: inline-block; }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<div class="reveal-box">
+  <div class="alert alert-warning">
+    The class placed <strong>{{ total_red_in_stack }}</strong> red cards on the
+    stack — short of the <strong>{{ threshold_n }}</strong> needed.
+    A random number from 1 to 10 will now be drawn. A draw of
+    <strong>1–{{ wipeout_max }}</strong> ({{ risk_pct }}%) means everyone earns
+    $0 this round.
+  </div>
+
+  <p class="text-muted">Drawing…</p>
+  <div id="roller" class="roller rolling">?</div>
+
+  <div id="verdict" class="verdict"></div>
+
+  <button id="reveal-next" class="btn btn-lg btn-primary px-5 mt-3"
+          onclick="document.querySelector('form').submit()">
+    See results →
+  </button>
+</div>
+
+<!-- oTree's form (with the Next button) lives here; we trigger it from JS -->
+{{ next_button }}
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  var FINAL_ROLL = {{ risk_roll }};
+  var WIPED_OUT  = {{ wiped_out_js }};
+
+  var roller  = document.getElementById('roller');
+  var verdict = document.getElementById('verdict');
+  var nextBtn = document.getElementById('reveal-next');
+
+  // Hide oTree's default next button; we use our own after the animation.
+  var otreeBtn = document.querySelector('.otree-btn-next');
+  if (otreeBtn) otreeBtn.style.display = 'none';
+
+  var ticks = 0;
+  var maxTicks = 22;          // how many shuffle frames before landing
+  var interval = setInterval(function () {
+    roller.textContent = Math.floor(Math.random() * 10) + 1;
+    ticks++;
+    if (ticks >= maxTicks) {
+      clearInterval(interval);
+      land();
+    }
+  }, 80);
+
+  function land() {
+    roller.textContent = FINAL_ROLL;
+    roller.classList.remove('rolling');
+    roller.classList.add(WIPED_OUT ? 'done-wipe' : 'done-safe');
+
+    verdict.textContent = WIPED_OUT
+      ? '💥 Wipeout — everyone earns $0 this round.'
+      : '✅ Safe — earnings stand this round.';
+    verdict.classList.add('show');
+
+    nextBtn.classList.add('show');
+  }
+</script>
+{{ endblock }}

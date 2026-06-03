@@ -1,0 +1,119 @@
+{{ block title }}Round {{ player.round_number }} Results{{ endblock }}
+
+{{ block styles }}
+<style>
+  .mini-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 80px;
+    height: 120px;
+    border-radius: 10px;
+    padding: 8px 6px;
+    font-family: Georgia, serif;
+    color: #fff;
+    box-shadow: 2px 3px 8px rgba(0,0,0,.25);
+    vertical-align: middle;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .mini-red   { background: #c0392b; }
+  .mini-black { background: #1a1a2e; }
+  .mini-both  { background: linear-gradient(145deg, #c0392b 48%, #1a1a2e 48%); }
+  .mini-suit  { font-size: 1.2rem; line-height: 1; }
+  .mini-suits { font-size: 1rem; display: flex; gap:.2rem; }
+
+  .outcome-rejected { opacity: .55; position: relative; }
+  .outcome-rejected::after {
+    content: '✕';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: rgba(180,0,0,.7);
+  }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<!-- Outcome banner -->
+{% if accepted %}
+  <div class="alert alert-success mb-3">
+    <strong>Offer Accepted.</strong>
+    Proposer played the {{ offer_label }} (Keep ${{ proposer_keeps }} / Give ${{ offered_amount }}).
+  </div>
+{% else %}
+  <div class="alert alert-danger mb-3">
+    <strong>Offer Rejected.</strong> Both players receive $0.
+  </div>
+{% endif %}
+
+<!-- Visual reveal row -->
+<div class="row text-center g-3 mb-4">
+  <!-- Proposer's card -->
+  <div class="col-6">
+    <p class="fw-bold mb-2">Proposer played</p>
+    <div class="{% if not accepted %}outcome-rejected{% endif %}" style="display:inline-block;">
+      {% if proposer_card == 'R' %}
+        <div class="mini-card mini-red">
+          <span class="mini-suit">♥</span>
+          <span>RED<br>$100/$0</span>
+          <span class="mini-suit">♦</span>
+        </div>
+      {% elif proposer_card == 'B' %}
+        <div class="mini-card mini-black">
+          <span class="mini-suit">♠</span>
+          <span>BLACK<br>$80/$20</span>
+          <span class="mini-suit">♣</span>
+        </div>
+      {% else %}
+        <div class="mini-card mini-both">
+          <span class="mini-suits"><span>♥</span><span>♠</span></span>
+          <span>BOTH<br>$50/$50</span>
+          <span class="mini-suits"><span>♦</span><span>♣</span></span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="mt-1 small text-muted">{{ offer_label }}</div>
+  </div>
+
+  <!-- Responder's card -->
+  <div class="col-6">
+    <p class="fw-bold mb-2">Responder played</p>
+    {% if accepted %}
+      <div class="mini-card mini-black" style="display:inline-flex;">
+        <span class="mini-suit">♠</span>
+        <span>BLACK<br>ACCEPT</span>
+        <span class="mini-suit">♣</span>
+      </div>
+      <div class="mt-1 small text-muted">Accepted</div>
+    {% else %}
+      <div class="mini-card mini-red" style="display:inline-flex;">
+        <span class="mini-suit">♥</span>
+        <span>RED<br>REJECT</span>
+        <span class="mini-suit">♦</span>
+      </div>
+      <div class="mt-1 small text-muted">Rejected</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Role label + earnings -->
+<div class="card mb-3">
+  <div class="card-body text-center">
+    <p class="mb-1">
+      You were the <strong>{{ my_role }}</strong> this round, playing with <strong>{{ partner_name }}</strong>.
+    </p>
+    <p class="mb-1">Earnings this round: <strong>${{ period_earnings }}</strong></p>
+    <p class="mb-0 text-muted">Running total: <strong>${{ cumulative_earnings }}</strong></p>
+  </div>
+</div>
+
+{% if is_last %}
+  <p class="text-muted">That was the final round. Click <strong>Next</strong> to see your full earnings record.</p>
+{% endif %}
+
+{{ next_button }}
+{{ endblock }}

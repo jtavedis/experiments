@@ -1,0 +1,47 @@
+{{ block title }}Round 6 of 10 — Payoffs Have Changed!{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-warning mb-4">
+  <h5 class="mb-1">⚡ New Phase: Rounds 6–10</h5>
+  The payoff amounts have changed.
+  Your partner and the card rules remain the same.
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">New payoff table — Rounds 6–10</div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle mb-0" style="max-width:420px;">
+        <thead class="table-light">
+          <tr>
+            <th style="width:35%"></th>
+            <th colspan="2">Partner plays…</th>
+          </tr>
+          <tr>
+            <th>You play…</th>
+            <th><span class="badge" style="background:#dc3545;">🔴 Red</span></th>
+            <th><span class="badge bg-dark">⚫ Black</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><span class="badge" style="background:#dc3545;">🔴 Red</span></th>
+            <td><strong>${{ rr.0 }} / ${{ rr.1 }}</strong></td>
+            <td><strong>${{ rb.0 }} / ${{ rb.1 }}</strong></td>
+          </tr>
+          <tr>
+            <th><span class="badge bg-dark">⚫ Black</span></th>
+            <td><strong>${{ br.0 }} / ${{ br.1 }}</strong></td>
+            <td><strong>${{ bb.0 }} / ${{ bb.1 }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="text-muted small mt-1 mb-0">Format: <em>Your earnings / Partner's earnings</em></p>
+    </div>
+  </div>
+</div>
+
+<p class="text-muted">Click <strong>Next</strong> when you are ready to begin Round 6.</p>
+{{ next_button }}
+{{ endblock }}

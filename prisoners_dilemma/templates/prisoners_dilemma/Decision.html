@@ -1,0 +1,196 @@
+{{ block title }}Round {{ player.round_number }} of {{ C.NUM_ROUNDS }} — Choose Your Card{{ endblock }}
+
+{{ block styles }}
+<style>
+  /* ── Card container ─────────────────────────────────────────────────────── */
+  .card-choice-wrap {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+  }
+
+  /* ── Individual card ────────────────────────────────────────────────────── */
+  .card-choice {
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+  }
+  .card-choice input[type="radio"] {
+    display: none;                /* hide native radio; JS drives state */
+  }
+
+  .playing-card {
+    width: 130px;
+    height: 200px;
+    border-radius: 14px;
+    border: 4px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 10px;
+    box-shadow: 3px 4px 12px rgba(0,0,0,.30);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    position: relative;
+    font-family: Georgia, serif;
+  }
+  .playing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 4px 10px 20px rgba(0,0,0,.40);
+  }
+
+  /* Selected state (via JS toggling .selected on the label) */
+  .card-choice.selected .playing-card {
+    border-color: #ffc107;
+    transform: translateY(-12px);
+    box-shadow: 0 16px 28px rgba(0,0,0,.50);
+  }
+
+  /* Card colours */
+  .red-card  { background: #c0392b; color: #fff; }
+  .black-card { background: #1a1a2e; color: #fff; }
+
+  .card-suit { font-size: 2rem; line-height: 1; }
+  .card-word { font-size: 1rem; font-weight: 700; letter-spacing: .12em; margin: auto 0; }
+  .card-label-text { font-size: .85rem; margin-top: .5rem; font-weight: 600; color: #444; }
+
+  /* Submit button (hidden until a card is chosen) */
+  #submit-btn {
+    display: none;
+    margin: 0 auto;
+  }
+  #submit-btn.visible { display: block; }
+
+  /* Phase badge */
+  .phase-pill {
+    display: inline-block;
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+  .phase-low  { background: #e8f4fd; color: #1a6090; border: 1px solid #bee0f5; }
+  .phase-high { background: #fef9e7; color: #9a6700; border: 1px solid #fce38a; }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<!-- Phase indicator -->
+<div class="text-center mb-2">
+  {% if is_low %}
+    <span class="phase-pill phase-low"> Phase 1 — Rounds 1–5</span>
+  {% else %}
+    <span class="phase-pill phase-high"> Phase 2 — Rounds 6–10</span>
+  {% endif %}
+</div>
+
+<p class="text-center mb-3">You are playing with <strong>{{ partner_name }}</strong>.</p>
+
+<!-- Payoff table (compact) -->
+<div class="d-flex justify-content-center mb-3">
+  <div class="table-responsive" style="max-width:420px;">
+    <table class="table table-bordered table-sm text-center align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th></th>
+          <th colspan="2" class="small">Partner plays…</th>
+        </tr>
+        <tr>
+          <th class="small">You play…</th>
+          <th><span style="color:#c0392b; font-weight:700;">🔴 Red</span></th>
+          <th><span class="fw-bold">⚫ Black</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th><span style="color:#c0392b; font-weight:700;">🔴 Red</span></th>
+          <td>${{ rr.0 }} / ${{ rr.1 }}</td>
+          <td>${{ rb.0 }} / ${{ rb.1 }}</td>
+        </tr>
+        <tr>
+          <th><span class="fw-bold">⚫ Black</span></th>
+          <td>${{ br.0 }} / ${{ br.1 }}</td>
+          <td>${{ bb.0 }} / ${{ bb.1 }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-muted small mb-0 mt-1">Your earnings / Partner's earnings</p>
+  </div>
+</div>
+
+<!-- Hidden oTree form field (oTree auto-wraps page content in its own <form>) -->
+<input type="hidden" name="choice" id="choice-value" value="">
+
+  <!-- The two cards -->
+  <div class="card-choice-wrap">
+
+    <!-- RED card -->
+    <label class="card-choice" id="label-R" onclick="selectCard('R')">
+      <input type="radio" name="choice_radio" value="R">
+      <div class="playing-card red-card">
+        <span class="card-suit">♥</span>
+        <span class="card-word">RED</span>
+        <span class="card-suit">♥</span>
+      </div>
+      <div class="card-label-text">Play Red</div>
+    </label>
+
+    <!-- BLACK card -->
+    <label class="card-choice" id="label-B" onclick="selectCard('B')">
+      <input type="radio" name="choice_radio" value="B">
+      <div class="playing-card black-card">
+        <span class="card-suit">♠</span>
+        <span class="card-word">BLACK</span>
+        <span class="card-suit">♠</span>
+      </div>
+      <div class="card-label-text">Play Black</div>
+    </label>
+
+  </div>
+
+  <p id="hint-text" class="text-center text-muted small">Click a card to select it, then confirm below.</p>
+
+  <div class="text-center">
+    <button type="submit" id="submit-btn" class="btn btn-lg btn-primary px-5">
+      Confirm my choice →
+    </button>
+  </div>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  var selected = null;
+
+  function selectCard(value) {
+    // Deselect previous
+    if (selected) {
+      document.getElementById('label-' + selected).classList.remove('selected');
+    }
+    // Select new
+    selected = value;
+    document.getElementById('label-' + value).classList.add('selected');
+    document.getElementById('choice-value').value = value;
+
+    // Show submit button and update hint
+    var btn = document.getElementById('submit-btn');
+    btn.classList.add('visible');
+    var color = value === 'R' ? 'Red' : 'Black';
+    document.getElementById('hint-text').textContent =
+      'You selected the ' + color + ' card. Click to confirm or choose again.';
+  }
+
+  // Guard: prevent submit if nothing chosen.
+  // oTree wraps page content in its own <form>; grab the nearest one.
+  document.querySelector('form').addEventListener('submit', function(e) {
+    if (!selected) {
+      e.preventDefault();
+      alert('Please select a card first.');
+    }
+  });
+</script>
+{{ endblock }}

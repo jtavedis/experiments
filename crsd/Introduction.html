@@ -1,0 +1,60 @@
+{{ block title }}Welcome — Card Game Instructions{{ endblock }}
+
+{{ block content }}
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">How the game works</div>
+  <div class="card-body">
+    <p>
+      You and everyone else in the room play together for
+      <strong>{{ C.NUM_ROUNDS }} rounds</strong>. Each round you hold
+      <strong>4 cards</strong>: two <span class="badge" style="background:#c0392b;">RED</span>
+      and two <span class="badge bg-dark">BLACK</span>.
+    </p>
+    <p>
+      Each round you play <strong>two</strong> of your four cards onto a common
+      stack and <strong>keep</strong> the other two. All choices are
+      <strong>anonymous</strong> — no one learns who played which cards.
+    </p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">How earnings are calculated</div>
+  <div class="card-body">
+    <p class="mb-2">Your earnings each round come from your red cards:</p>
+    <div class="alert alert-light border text-center mb-2">
+      <strong>Earnings = ${{ dollars_per_red_kept }} × (red cards you keep)
+      &nbsp;+&nbsp; $1 × (total red cards in the whole stack)</strong>
+    </div>
+    <ul class="mb-0">
+      <li>Each red card you <strong>keep</strong> earns you
+        <strong>${{ dollars_per_red_kept }}</strong>.</li>
+      <li>Black cards you keep earn you <strong>nothing</strong>.</li>
+      <li>Every red card placed on the stack (by anyone) adds
+        <strong>$1 to everyone's</strong> earnings.</li>
+      <li>Black cards on the stack have <strong>no effect</strong>.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Structure</div>
+  <div class="card-body">
+    <ul class="mb-0">
+      <li><strong>Rounds 1–4</strong> — Standard game, as described above.</li>
+      <li><strong>Rounds 5–8</strong> — The structure changes: a risk of losing
+        the round's earnings is introduced.</li>
+      <li><strong>Rounds 9–12</strong> — The structure changes again, with a
+        higher risk.</li>
+    </ul>
+    <p class="text-muted small mt-2 mb-0">
+      You will see a full explanation of each new structure before it begins.
+    </p>
+  </div>
+</div>
+
+<p class="text-muted small">All earnings are hypothetical.</p>
+
+{{ next_button }}
+{{ endblock }}

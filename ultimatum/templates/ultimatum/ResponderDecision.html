@@ -1,0 +1,164 @@
+{{ block title }}Round {{ player.round_number }} of {{ C.NUM_ROUNDS }} — You are the Responder{{ endblock }}
+
+{{ block styles }}
+<style>
+  .card-option-wrap {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+  .card-option {
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+  }
+  .card-option input[type="radio"] { display: none; }
+
+  .playing-card {
+    width: 130px;
+    height: 195px;
+    border-radius: 14px;
+    border: 4px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 10px;
+    box-shadow: 3px 4px 12px rgba(0,0,0,.30);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    font-family: Georgia, serif;
+    color: #fff;
+  }
+  .playing-card:hover { transform: translateY(-6px); box-shadow: 4px 10px 20px rgba(0,0,0,.40); }
+  .card-option.selected .playing-card {
+    border-color: #ffc107;
+    transform: translateY(-12px);
+    box-shadow: 0 16px 28px rgba(0,0,0,.50);
+  }
+
+  .red-card   { background: #c0392b; }
+  .black-card { background: #1a1a2e; }
+
+  .card-suit  { font-size: 1.7rem; line-height: 1; }
+  .card-body-text { font-size: .8rem; font-weight: 700; letter-spacing: .05em; text-align: center; line-height: 1.4; }
+  .card-option-label { font-size: .85rem; font-weight: 600; color: #333; margin-top: .5rem; }
+
+  /* Offer summary pill */
+  .offer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: #f8f9fa;
+    border: 1.5px solid #dee2e6;
+    border-radius: 10px;
+    padding: .6rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  #submit-btn { display: none; }
+  #submit-btn.visible { display: inline-block; }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-success mb-3">
+  <strong>Your role this round: Responder.</strong>
+  Review <strong>{{ partner_name }}</strong>'s offer below and decide whether to accept or reject.
+</div>
+
+<!-- Proposal summary -->
+<div class="card mb-3">
+  <div class="card-header fw-bold">{{ partner_name }}'s Offer</div>
+  <div class="card-body text-center">
+    {% if proposer_card == 'R' %}
+      <span class="offer-pill">
+        <span style="color:#c0392b; font-size:1.4rem;">♥</span>
+        <span><strong>Red Card</strong> — Proposer keeps ${{ proposer_keeps }}, offers you <strong>${{ offered_amount }}</strong></span>
+      </span>
+    {% elif proposer_card == 'B' %}
+      <span class="offer-pill">
+        <span style="font-size:1.4rem;">♠</span>
+        <span><strong>Black Card</strong> — Proposer keeps ${{ proposer_keeps }}, offers you <strong>${{ offered_amount }}</strong></span>
+      </span>
+    {% else %}
+      <span class="offer-pill">
+        <span style="font-size:1.4rem;">♥♠</span>
+        <span><strong>Both Cards</strong> — Proposer keeps ${{ proposer_keeps }}, offers you <strong>${{ offered_amount }}</strong></span>
+      </span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Response form -->
+<!-- Response form (oTree auto-wraps page content in its own <form>) -->
+<input type="hidden" name="response" id="response-value" value="">
+
+  <p class="text-center fw-bold mb-1">Choose your response:</p>
+
+  <div class="card-option-wrap">
+
+    <!-- Black = Accept -->
+    <div class="card-option" id="opt-A" onclick="selectResponse('A')">
+      <div class="playing-card black-card">
+        <span class="card-suit">♠</span>
+        <div class="card-body-text">
+          <div>BLACK</div>
+          <div style="margin-top:6px;">ACCEPT</div>
+          <div class="mt-1" style="font-size:.7rem;">You get ${{ offered_amount }}</div>
+        </div>
+        <span class="card-suit">♣</span>
+      </div>
+      <div class="card-option-label">Accept</div>
+    </div>
+
+    <!-- Red = Reject -->
+    <div class="card-option" id="opt-R" onclick="selectResponse('R')">
+      <div class="playing-card red-card">
+        <span class="card-suit">♥</span>
+        <div class="card-body-text">
+          <div>RED</div>
+          <div style="margin-top:6px;">REJECT</div>
+          <div class="mt-1" style="font-size:.7rem;">Both get $0</div>
+        </div>
+        <span class="card-suit">♦</span>
+      </div>
+      <div class="card-option-label">Reject</div>
+    </div>
+
+  </div><!-- /card-option-wrap -->
+
+  <p id="hint-text" class="text-center text-muted small">
+    Click a card to select, then confirm below.
+  </p>
+
+<div class="text-center">
+    <button type="submit" id="submit-btn" class="btn btn-lg btn-primary px-5">
+      Confirm response →
+    </button>
+  </div>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+  var selected = null;
+
+  function selectResponse(value) {
+    if (selected) document.getElementById('opt-' + selected).classList.remove('selected');
+    selected = value;
+    document.getElementById('opt-' + value).classList.add('selected');
+    document.getElementById('response-value').value = value;
+
+    document.getElementById('hint-text').textContent =
+      'You chose to ' + (value === 'A' ? 'Accept' : 'Reject') + '. Click to confirm or change.';
+    document.getElementById('submit-btn').classList.add('visible');
+  }
+
+  document.querySelector('form').addEventListener('submit', function(e) {
+    if (!selected) { e.preventDefault(); alert('Please select Accept or Reject.'); }
+  });
+</script>
+{{ endblock }}

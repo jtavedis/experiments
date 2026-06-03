@@ -1,0 +1,44 @@
+{{ block title }}Round {{ player.round_number }} — The Structure Has Changed{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-warning mb-4">
+  <h5 class="mb-1">⚡ New Phase: Rounds {{ start_round }}{% if phase == 2 %}–8{% else %}–12{% endif %}</h5>
+  A <strong>risk</strong> is now part of the game.
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">The new rule</div>
+  <div class="card-body">
+    <p>
+      The basic earnings formula is unchanged
+      ($6 per red card you keep, plus $1 per red card in the stack).
+      But now there is a <strong>{{ risk_pct }}% risk</strong> that
+      <em>everyone loses all earnings for the round</em>, unless the group
+      contributes enough red cards.
+    </p>
+    <ul class="mb-0">
+      <li>If the total number of red cards in the stack reaches
+        <strong>{{ threshold_n }}</strong> or more, the round is
+        <strong>completely safe</strong> — no risk applies.</li>
+      <li>If the stack falls <strong>short</strong> of {{ threshold_n }} red
+        cards, a single random number from 1 to 10 is drawn for the whole class.
+        {% if phase == 2 %}
+          If it is <strong>1, 2, 3, or 4</strong> ({{ risk_pct }}% chance),
+          everyone earns <strong>$0</strong> this round.
+        {% else %}
+          If it is <strong>1 through 9</strong> ({{ risk_pct }}% chance),
+          everyone earns <strong>$0</strong> this round.
+        {% endif %}
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p class="text-muted">
+  Reaching the threshold protects everyone — but each red card you contribute is
+  one you don't keep for yourself. Click <strong>Next</strong> when ready.
+</p>
+
+{{ next_button }}
+{{ endblock }}

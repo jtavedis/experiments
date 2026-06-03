@@ -1,0 +1,86 @@
+{{ block title }}Welcome — Ultimatum Game Instructions{{ endblock }}
+
+{{ block content }}
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Overview</div>
+  <div class="card-body">
+    <p>
+      You will be <strong>matched with a partner</strong> and play a card game for
+      <strong>{{ C.NUM_ROUNDS }} rounds</strong>.
+      At the start of each round, roles are assigned randomly — like a coin flip.
+      One player becomes the <strong>Proposer</strong>; the other becomes the <strong>Responder</strong>.
+    </p>
+    <p>
+      The Proposer starts with a <strong>${{ C.ENDOWMENT }} endowment</strong> and chooses how to split it.
+      The Responder then decides whether to accept or reject.
+    </p>
+  </div>
+</div>
+
+<!-- Proposer options -->
+<div class="card mb-4">
+  <div class="card-header fw-bold">🎴 Proposer — Three Card Options</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card border-danger text-center p-3 h-100">
+          <div class="mb-2" style="font-size:2rem; color:#c0392b;">♥</div>
+          <div class="fw-bold text-danger mb-1">Red Card</div>
+          <div>Keep <strong>$100</strong></div>
+          <div class="text-muted">Give $0</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-dark text-center p-3 h-100">
+          <div class="mb-2" style="font-size:2rem;">♠</div>
+          <div class="fw-bold mb-1">Black Card</div>
+          <div>Keep <strong>$80</strong></div>
+          <div class="text-muted">Give $20</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center p-3 h-100"
+             style="background: linear-gradient(to bottom, #f8d7da 50%, #d3d3d3 50%); border: 2px solid #666;">
+          <div class="mb-2" style="font-size:2rem;">♥♠</div>
+          <div class="fw-bold mb-1">Both Cards</div>
+          <div>Keep <strong>$50</strong></div>
+          <div class="text-muted">Give $50</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Responder options -->
+<div class="card mb-4">
+  <div class="card-header fw-bold">🃏 Responder — Accept or Reject</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card border-dark text-center p-3 h-100">
+          <div class="mb-2" style="font-size:2rem;">♠</div>
+          <div class="fw-bold mb-1">Black Card — Accept</div>
+          <div class="text-muted small">Payoffs are distributed as proposed.</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-danger text-center p-3 h-100">
+          <div class="mb-2" style="font-size:2rem; color:#c0392b;">♥</div>
+          <div class="fw-bold text-danger mb-1">Red Card — Reject</div>
+          <div class="text-muted small">See the scenario below for consequences.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- The rule -->
+<div class="alert alert-warning mb-4">
+  <strong>The Rule:</strong> If the Responder rejects the offer, <em>both</em> players receive $0 for that round.
+</div>
+
+<p class="text-muted small">All earnings are hypothetical. Do not reveal your decision to your partner before submitting.</p>
+
+{{ next_button }}
+{{ endblock }}

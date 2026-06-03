@@ -1,0 +1,66 @@
+{{ block title }}Round {{ player.round_number }} Results{{ endblock }}
+
+{{ block content }}
+
+<!-- Outcome banner -->
+{% if wiped_out %}
+  <div class="alert alert-danger mb-3">
+    <strong>Wipeout!</strong> The stack fell short of the threshold and the random
+    draw ({{ risk_roll }}) triggered the {{ risk_pct }}% risk.
+    <strong>Everyone earns $0 this round.</strong>
+  </div>
+{% elif risky and threshold_met %}
+  <div class="alert alert-success mb-3">
+    <strong>Threshold reached — the round was safe.</strong>
+    The class contributed {{ total_red_in_stack }} red cards
+    (needed {{ threshold_n }}). No risk applied.
+  </div>
+{% elif risky %}
+  <div class="alert alert-success mb-3">
+    <strong>Safe!</strong> The stack fell short ({{ total_red_in_stack }} of
+    {{ threshold_n }} red cards), but the random draw ({{ risk_roll }}) did not
+    trigger the {{ risk_pct }}% risk this time.
+  </div>
+{% else %}
+  <div class="alert alert-secondary mb-3">
+    <strong>Round complete.</strong>
+    The class contributed {{ total_red_in_stack }} red cards to the stack.
+  </div>
+{% endif %}
+
+<!-- Your round summary -->
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row text-center">
+      <div class="col-4">
+        <div class="text-muted small">You kept</div>
+        <div class="fw-bold fs-5">{{ red_kept }} red</div>
+      </div>
+      <div class="col-4">
+        <div class="text-muted small">You contributed</div>
+        <div class="fw-bold fs-5">{{ red_contributed }} red</div>
+      </div>
+      <div class="col-4">
+        <div class="text-muted small">Total red in stack</div>
+        <div class="fw-bold fs-5">{{ total_red_in_stack }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Earnings -->
+<div class="card mb-3">
+  <div class="card-body text-center">
+    <p class="mb-1">Earnings this round: <strong>${{ period_earnings }}</strong></p>
+    <p class="mb-0 text-muted">Running total (all rounds so far):
+      <strong>${{ cumulative_earnings }}</strong></p>
+  </div>
+</div>
+
+{% if is_last %}
+  <p class="text-muted">That was the final round. Click <strong>Next</strong> to
+    see your complete earnings record.</p>
+{% endif %}
+
+{{ next_button }}
+{{ endblock }}

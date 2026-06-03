@@ -38,6 +38,46 @@ SESSION_CONFIGS = [
         #num_bots=18,
         # ────────────────────────────────────────────────────────────────────
     ),
+    dict(
+        name='prisoners_dilemma',
+        display_name='Prisoner\'s Dilemma (Fixed Partner)',
+        app_sequence=['prisoners_dilemma'],
+        num_demo_participants=4,
+        # Payoffs are defined directly in prisoners_dilemma/__init__.py.
+        # Edit PAYOFF_LOW and PAYOFF_HIGH there to change the stakes.
+    ),
+    dict(
+        name='prisoners_dilemma_random',
+        display_name='Prisoner\'s Dilemma (Random Matching)',
+        app_sequence=['prisoners_dilemma'],
+        num_demo_participants=4,
+        # To activate random matching, open prisoners_dilemma/__init__.py,
+        # comment out the fixed-matching block in creating_session(), and
+        # uncomment the subsession.group_randomly() line below it.
+    ),
+    dict(
+        name='ultimatum_fixed',
+        display_name='Experiment 4 — Ultimatum Game, Fixed Partner',
+        app_sequence=['ultimatum'],
+        num_demo_participants=4,
+        # Matching: FIXED — see creating_session() in ultimatum/__init__.py
+    ),
+    dict(
+        name='ultimatum_random',
+        display_name='Experiment 4 — Ultimatum Game, Random Matching',
+        app_sequence=['ultimatum'],
+        num_demo_participants=4,
+        # To activate random matching, open ultimatum/__init__.py,
+        # comment out the fixed-matching block and uncomment group_randomly().
+    ),
+    dict(
+        name='crsd',
+        display_name='Collective-Risk Social Dilemma',
+        app_sequence=['crsd'],
+        num_demo_participants=4,
+        # To activate random matching, open ultimatum/__init__.py,
+        # comment out the fixed-matching block and uncomment group_randomly().
+    ),
 ]
 
 # ---- Rooms (single public link + unique seats) ----
@@ -67,7 +107,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=1.00, participation_fee=0.00, doc=""
 )
 
-PARTICIPANT_FIELDS = []
+PARTICIPANT_FIELDS = ['full_name']
 SESSION_FIELDS = []
 
 # ISO-639 code

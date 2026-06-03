@@ -1,0 +1,79 @@
+{{ block title }}Final Results — All {{ C.NUM_ROUNDS }} Rounds{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-info mb-4">
+  <h4 class="mb-1">Experiment Complete</h4>
+  Your total earnings across all {{ C.NUM_ROUNDS }} rounds:
+  <strong>${{ total_earnings }}</strong>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Earnings Record</div>
+  <div class="card-body p-0">
+    <table class="table table-sm table-bordered mb-0 text-center align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Round</th>
+          <th>Phase</th>
+          <th>Red Kept</th>
+          <th>Red Contributed</th>
+          <th>Total Red in Stack</th>
+          <th>Outcome</th>
+          <th>Earnings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in period_data %}
+          <tr {% if row.wiped_out %}class="table-danger"{% endif %}>
+            <td>{{ row.round }}</td>
+            <td>
+              {% if row.phase == 1 %}
+                <span class="badge bg-secondary">Standard</span>
+              {% elif row.phase == 2 %}
+                <span class="badge" style="background:#f0ad4e;">40% Risk</span>
+              {% else %}
+                <span class="badge bg-danger">90% Risk</span>
+              {% endif %}
+            </td>
+            <td>{{ row.red_kept }}</td>
+            <td>{{ row.red_contributed }}</td>
+            <td>{{ row.total_red_in_stack }}</td>
+            <td>
+              {% if row.phase == 1 %}
+                —
+              {% elif row.wiped_out %}
+                <span class="badge bg-danger">Wiped out (roll {{ row.risk_roll }})</span>
+              {% elif row.threshold_met %}
+                <span class="badge bg-success">Safe (threshold met)</span>
+              {% else %}
+                <span class="badge bg-success">Safe (roll {{ row.risk_roll }})</span>
+              {% endif %}
+            </td>
+            <td class="fw-bold">${{ row.earnings }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="6" class="text-end">Total</td>
+          <td>${{ total_earnings }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<p class="text-muted small">All earnings are hypothetical. Thank you for participating!</p>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Your Part 1 Lottery Choices</div>
+  <div class="card-body">
+    <p class="mb-1">Lottery 1: you chose to buy
+      <strong>{{ lottery1 }} ticket{% if lottery1 != 1 %}s{% endif %}</strong>.</p>
+    <p class="mb-0">Lottery 2: you chose to buy
+      <strong>{{ lottery2 }} ticket{% if lottery2 != 1 %}s{% endif %}</strong>.</p>
+  </div>
+</div>
+
+{{ endblock }}

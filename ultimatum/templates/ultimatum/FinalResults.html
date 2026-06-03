@@ -1,0 +1,65 @@
+{{ block title }}Final Results — All {{ C.NUM_ROUNDS }} Rounds{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-info mb-4">
+  <h4 class="mb-1">Experiment Complete</h4>
+  Your total earnings across all {{ C.NUM_ROUNDS }} rounds:
+  <strong>${{ total_earnings }}</strong>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">Earnings Record</div>
+  <div class="card-body p-0">
+    <table class="table table-sm table-bordered mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="text-center">Round</th>
+          <th class="text-center">Your Role</th>
+          <th class="text-center">Partner</th>
+          <th class="text-center">Proposer's Card</th>
+          <th class="text-center">Offer (Keep / Give)</th>
+          <th class="text-center">Outcome</th>
+          <th class="text-center">Your Earnings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in period_data %}
+          <tr {% if not row.accepted %}class="table-danger"{% elif row.offered_amount == 50 %}class="table-success"{% endif %}>
+            <td class="text-center">{{ row.round }}</td>
+            <td class="text-center">{{ row.my_role }}</td>
+            <td class="text-center">{{ row.partner_name }}</td>
+            <td class="text-center">
+              {% if row.proposer_card == 'R' %}
+                <span style="color:#c0392b; font-weight:bold;">🔴 Red</span>
+              {% elif row.proposer_card == 'B' %}
+                <span class="fw-bold">⚫ Black</span>
+              {% else %}
+                <span class="fw-bold">🔴⚫ Both</span>
+              {% endif %}
+            </td>
+            <td class="text-center">${{ row.proposer_keeps }} / ${{ row.offered_amount }}</td>
+            <td class="text-center">
+              {% if row.accepted %}
+                <span class="badge bg-success">Accepted</span>
+              {% else %}
+                <span class="badge bg-danger">Rejected</span>
+              {% endif %}
+            </td>
+            <td class="text-center fw-bold">${{ row.earnings }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="6" class="text-end">Total</td>
+          <td class="text-center">${{ total_earnings }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<p class="text-muted small">All earnings are hypothetical. Thank you for participating!</p>
+
+{{ endblock }}

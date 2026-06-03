@@ -1,0 +1,107 @@
+{{ block title }}Round {{ player.round_number }} Results{{ endblock }}
+
+{{ block styles }}
+<style>
+  .reveal-card {
+    width: 90px;
+    height: 140px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 8px;
+    box-shadow: 2px 3px 8px rgba(0,0,0,.25);
+    font-family: Georgia, serif;
+    color: #fff;
+    margin: 0 auto;
+  }
+  .reveal-card.red-card   { background: #c0392b; }
+  .reveal-card.black-card { background: #1a1a2e; }
+  .reveal-suit { font-size: 1.5rem; line-height: 1; }
+  .reveal-word { font-size: .75rem; font-weight: 700; letter-spacing: .1em; }
+</style>
+{{ endblock }}
+
+{{ block content }}
+
+<!-- Outcome headline -->
+{% if my_choice == 'R' and partner_choice == 'R' %}
+  <div class="alert alert-secondary mb-3">
+    <strong>Both played Red.</strong> You each earned ${{ period_earnings }}.
+  </div>
+{% elif my_choice == 'B' and partner_choice == 'B' %}
+  <div class="alert alert-success mb-3">
+    <strong>Both played Black </strong> You each earned ${{ period_earnings }}.
+  </div>
+{% elif my_choice == 'R' and partner_choice == 'B' %}
+  <div class="alert alert-warning mb-3">
+    <strong>You played Red, your partner played Black.</strong>
+    You earned ${{ period_earnings }}; your partner earned $0.
+  </div>
+{% else %}
+  <div class="alert alert-info mb-3">
+    <strong>You played Black, your partner played Red.</strong>
+    You earned ${{ period_earnings }}; your partner earned more.
+  </div>
+{% endif %}
+
+<!-- Card reveal row -->
+<div class="row text-center g-3 mb-4">
+  <div class="col-6">
+    <p class="fw-bold mb-1">You played</p>
+    {% if my_choice == 'R' %}
+      <div class="reveal-card red-card mx-auto">
+        <span class="reveal-suit">♥</span>
+        <span class="reveal-word">RED</span>
+        <span class="reveal-suit">♥</span>
+      </div>
+    {% else %}
+      <div class="reveal-card black-card mx-auto">
+        <span class="reveal-suit">♠</span>
+        <span class="reveal-word">BLACK</span>
+        <span class="reveal-suit">♠</span>
+      </div>
+    {% endif %}
+  </div>
+  <div class="col-6">
+    <p class="fw-bold mb-1">{{ partner_name }} played</p>
+    {% if partner_choice == 'R' %}
+      <div class="reveal-card red-card mx-auto">
+        <span class="reveal-suit">♥</span>
+        <span class="reveal-word">RED</span>
+        <span class="reveal-suit">♥</span>
+      </div>
+    {% else %}
+      <div class="reveal-card black-card mx-auto">
+        <span class="reveal-suit">♠</span>
+        <span class="reveal-word">BLACK</span>
+        <span class="reveal-suit">♠</span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Earnings summary -->
+<div class="card mb-3">
+  <div class="card-body text-center">
+    <p class="mb-1">Earnings this round: <strong>${{ period_earnings }}</strong></p>
+    <p class="mb-0 text-muted">Running total (all rounds so far):
+      <strong>${{ cumulative_earnings }}</strong></p>
+  </div>
+</div>
+
+<!-- Phase-change notice -->
+{% if phase_change_next %}
+  <div class="alert alert-warning">
+    ⚡ <strong>Next round the stakes change</strong> — payoffs will double for Rounds 6–10.
+    You will see the new table before making your choice.
+  </div>
+{% endif %}
+
+{% if is_last %}
+  <p class="text-muted">That was the final round. Click <strong>Next</strong> to see your complete earnings record.</p>
+{% endif %}
+
+{{ next_button }}
+{{ endblock }}
