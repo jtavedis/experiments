@@ -1,0 +1,68 @@
+{{ block title }}Round {{ player.round_number }} Results{{ endblock }}
+
+{{ block content }}
+
+{% if traded %}
+  <div class="alert alert-success">
+    <h5 class="mb-1">You traded at <strong>${{ trade_price }}</strong></h5>
+    {% if role == 'buyer' %}
+      Your value was ${{ value_cost }}.
+      Earnings this period: <strong>${{ period_earnings }}</strong>
+      &nbsp;(${{ value_cost }} − ${{ trade_price }})
+    {% else %}
+      Your cost was ${{ value_cost }}.
+      Earnings this period: <strong>${{ period_earnings }}</strong>
+      &nbsp;(${{ trade_price }} − ${{ value_cost }})
+    {% endif %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary">
+    You did not trade this period. Earnings: <strong>$0</strong>.
+  </div>
+{% endif %}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-bold">All trades this period</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>#</th><th>Price</th></tr>
+          </thead>
+          <tbody>
+            {% for t in trades %}
+              <tr>
+                <td>{{ t.trade_number }}</td>
+                <td>${{ t.price }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="text-center text-muted py-2">No trades occurred</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-bold">Your running total</div>
+      <div class="card-body">
+        <p class="mb-1">Period earnings: <strong>${{ period_earnings }}</strong></p>
+        <p class="mb-0">Cumulative earnings (all rounds so far):
+          <strong>${{ cumulative_earnings }}</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if player.round_number < C.NUM_ROUNDS %}
+  <p class="text-muted">
+    Round {{ player.round_number }} of {{ C.NUM_ROUNDS }} complete.
+    New values/costs will be assigned for the next round.
+  </p>
+{% endif %}
+
+{{ next_button }}
+{{ endblock }}

@@ -9,20 +9,34 @@ SESSION_CONFIGS = [
         num_demo_participants=3,
         rounds=3,
     ),
+    #dict(
+    #    name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
+    #),
+    #dict(
+    #    name='pgg',        # must match app folder
+    #    display_name="pgg",
+    #    num_demo_participants=4,
+    #    app_sequence=['pgg'],
+    #),
+    #dict(
+    #    name='bradyseism',
+    #    display_name='Studio Bradisismo - Campi Flegrei',
+    #    app_sequence=['bradyseism'],
+    #    num_demo_participants=10,
+    #),
     dict(
-        name='wtp_survey', app_sequence=['wtp_survey'], num_demo_participants=2
-    ),
-    dict(
-        name='pgg',        # must match app folder
-        display_name="pgg",
+        name='double_auction',
+        display_name='Pit Market',
+        app_sequence=['double_auction'],
         num_demo_participants=4,
-        app_sequence=['pgg'],
-    ),
-    dict(
-        name='bradyseism',
-        display_name='Studio Bradisismo - Campi Flegrei',
-        app_sequence=['bradyseism'],
-        num_demo_participants=10,
+        # ── Customize supply / demand here ──────────────────────────────────
+        # Half the players become buyers, the rest become sellers.
+        # The lists below are shuffled and re-assigned each round.
+        # Make both lists the same length as your intended buyer/seller count.
+        buyer_values=[10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+        seller_costs=[1,  2, 3, 4, 5, 6, 7, 8, 9, 10],
+        #num_bots=18,
+        # ────────────────────────────────────────────────────────────────────
     ),
 ]
 
@@ -35,12 +49,12 @@ ROOMS = [
         # Optional: uncomment if you want to tag sessions created from this room
         # use_secure_urls=False,
     ),
-    dict(
-        name='bradyseism',
-        display_name='Studio Campi Flegrei',
-        participant_label_file='_rooms/participant_labels.txt',
-        use_secure_urls=True,
-    ),
+    #dict(
+    #    name='bradyseism',
+    #    display_name='Studio Campi Flegrei',
+    #    participant_label_file='_rooms/participant_labels.txt',
+    #    use_secure_urls=True,
+    #),
 ]
 
 

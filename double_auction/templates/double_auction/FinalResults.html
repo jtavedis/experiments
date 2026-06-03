@@ -1,0 +1,49 @@
+{{ block title }}Final Results{{ endblock }}
+
+{{ block content }}
+
+<div class="alert alert-info mb-4">
+  <h4 class="mb-1">Experiment Complete</h4>
+  Total earnings across all {{ C.NUM_ROUNDS }} rounds:
+  <strong>${{ total_earnings }}</strong>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">Earnings Record</div>
+  <div class="card-body p-0">
+    <table class="table table-sm table-bordered mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Round</th>
+          <th>Role</th>
+          <th>Value / Cost</th>
+          <th>Traded?</th>
+          <th>Trade Price</th>
+          <th>Earnings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in period_data %}
+          <tr {% if row.traded %}class="table-success"{% endif %}>
+            <td>{{ row.round }}</td>
+            <td>{{ row.role_display }}</td>
+            <td>${{ row.value_cost }}</td>
+            <td>{% if row.traded %}Yes{% else %}No{% endif %}</td>
+            <td>{% if row.traded %}${{ row.trade_price }}{% else %}—{% endif %}</td>
+            <td>${{ row.earnings }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="5" class="text-end">Total</td>
+          <td>${{ total_earnings }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<p class="text-muted mt-3">All earnings are hypothetical. Thank you for participating!</p>
+
+{{ endblock }}

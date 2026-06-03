@@ -1,0 +1,73 @@
+{{ block title }}Welcome to the Market Experiment{{ endblock }}
+
+{{ block content }}
+<div class="card mb-4">
+  <div class="card-header fw-bold">Overview</div>
+  <div class="card-body">
+    <p>
+      You are about to participate in a market for <strong>home painting services</strong>.
+      You will be randomly assigned the role of either a <strong>Buyer</strong> or a
+      <strong>Seller</strong>, and you will keep that role for all
+      {{ C.NUM_ROUNDS }} trading periods.
+    </p>
+    <p>
+      At the start of each period, every player receives a private number — your
+      <em>value</em> (if you are a buyer) or your <em>cost</em> (if you are a seller).
+      These numbers are reshuffled at the start of every new period.
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-primary h-100">
+      <div class="card-header bg-primary text-white fw-bold">🛒 Buyers</div>
+      <div class="card-body">
+        <ul>
+          <li>Your <strong>value</strong> is the maximum price you are willing to pay.</li>
+          <li>You earn <strong>value − price</strong> on each successful trade.</li>
+          <li>You <em>cannot</em> accept a price above your value.</li>
+          <li>If you do not trade, your earnings for the period are <strong>$0</strong>.</li>
+        </ul>
+        <div class="alert alert-primary py-2">
+          <strong>Example:</strong> Value = $9, Trade price = $4 → Earnings = $9 − $4 = <strong>$5</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-success h-100">
+      <div class="card-header bg-success text-white fw-bold">🏠 Sellers</div>
+      <div class="card-body">
+        <ul>
+          <li>Your <strong>cost</strong> is the minimum price you are willing to accept.</li>
+          <li>You earn <strong>price − cost</strong> on each successful trade.</li>
+          <li>You <em>cannot</em> accept a price below your cost.</li>
+          <li>If you do not trade, your earnings for the period are <strong>$0</strong>.</li>
+        </ul>
+        <div class="alert alert-success py-2">
+          <strong>Example:</strong> Cost = $2, Trade price = $3 → Earnings = $3 − $2 = <strong>$1</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">How trading works</div>
+  <div class="card-body">
+    <ol>
+      <li>You will see a <strong>Market Board</strong> showing all active bids (from buyers) and asks (from sellers).</li>
+      <li>Post your own bid or ask by entering a price and clicking <em>Post</em>.</li>
+      <li>Accept any standing offer from the other side by clicking <em>Accept</em>.</li>
+      <li>You may update or retract your standing offer at any time before it is accepted.</li>
+      <li>Each player may complete at most <strong>one trade per period</strong>.</li>
+      <li>The trading period lasts <strong>{{ C.TRADING_SECONDS }} seconds</strong>. All completed trade prices are publicly announced on the board.</li>
+    </ol>
+  </div>
+</div>
+
+<p class="text-muted">Your earnings are hypothetical. Please do not discuss your private value or cost with other participants.</p>
+
+{{ next_button }}
+{{ endblock }}

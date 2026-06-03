@@ -8,15 +8,6 @@ Replication of NdT design with:
 - Ambiguity (Ellsberg) addition
 - HR-LR / LR-HR treatment variation
 - 7 sections total
-
-Sections:
-1. Loss lottery
-2. Gain lottery  
-3. Ambiguity preference (Ellsberg two-urn)
-4. CRSD first risk level (HR or LR depending on treatment)
-5. CRSD second risk level (LR or HR depending on treatment)
-6. CRSD ambiguous risk
-7. Questionnaire
 """
 
 
