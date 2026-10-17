@@ -18,12 +18,6 @@ SESSION_CONFIGS = [
     #    num_demo_participants=4,
     #    app_sequence=['pgg'],
     #),
-    #dict(
-    #    name='bradyseism',
-    #    display_name='Studio Bradisismo - Campi Flegrei',
-    #    app_sequence=['bradyseism'],
-    #    num_demo_participants=10,
-    #),
     dict(
         name='double_auction',
         display_name='Pit Market',
@@ -89,12 +83,6 @@ ROOMS = [
         # Optional: uncomment if you want to tag sessions created from this room
         # use_secure_urls=False,
     ),
-    #dict(
-    #    name='bradyseism',
-    #    display_name='Studio Campi Flegrei',
-    #    participant_label_file='_rooms/participant_labels.txt',
-    #    use_secure_urls=True,
-    #),
 ]
 
 
