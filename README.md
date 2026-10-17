@@ -16,7 +16,7 @@ the idea is to have an experiment for each unit covered. however, for unit 1 and
 ```
 
 ### instructions/
-step-by-step instructions for running each experiment in class with pen and paper or cards.
+contains the instructions for each experiment in class with pen and paper or cards. to save paper, i tried to keep the instructions and tables on one page. 
 
 ### otree/
 the oTree project containing computerized versions of the same experiments. the games are designed to match the pen and paper versions, so the two formats can be used interchangeably or compared.
@@ -26,15 +26,6 @@ the folder is a complete, self-contained oTree project:
 - `settings.py` defines the session configurations, one for each experiment, and is what oTree reads to know which experiments are available
 - each experiment is its own app (a subfolder containing the pages, templates, and game logic)
 - `requirements.txt` lists the python packages needed
-
-to use the experiments:
-
-1. install oTree (https://otree.readthedocs.io) and python
-2. download or clone this repository
-3. open a terminal inside the `otree` folder (oTree commands must be run from the folder that contains `settings.py`)
-4. install the requirements with `pip install -r requirements.txt`
-5. run `otree devserver` to test locally, then open http://localhost:8000 in a browser
-6. to run the experiments with students, host the project on your own server (see the oTree documentation on deployment) and share the session links with participants
 
 you are free to edit the apps, change the parameters (payoffs, number of rounds, group sizes) in `settings.py` or in each app, and adapt them to your own course.
 
