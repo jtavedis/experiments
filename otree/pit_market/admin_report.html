@@ -1,0 +1,11 @@
+<h4>Pit market: round-by-round summary</h4>
+<p>Total surplus counts tax revenue. Max surplus matches the highest buyers with the lowest sellers from the cards actually dealt.</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>Round</th><th>Policy</th><th>Trades</th><th>Mean price</th><th>Std dev</th><th>Low</th><th>High</th><th>Total surplus</th><th>Max surplus</th><th>Efficiency</th><th>Prices</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr><td>{{ r.round }}</td><td>{{ r.policy }}</td><td>{{ r.trades }}</td><td>{{ r.mean }}</td><td>{{ r.sd }}</td><td>{{ r.low }}</td><td>{{ r.high }}</td><td>{{ r.total_surplus }}</td><td>{{ r.max_surplus }}</td><td>{{ r.efficiency }}</td><td>{{ r.prices }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p>Every chat message, offer and trade: Data tab → custom exports → pit_market.</p>

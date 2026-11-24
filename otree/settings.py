@@ -33,6 +33,18 @@ SESSION_CONFIGS = [
         # ────────────────────────────────────────────────────────────────────
     ),
     dict(
+        name='pit_market',
+        display_name='Experiment 6 — Pit Market (decentralized, chat + offers)',
+        app_sequence=['pit_market'],
+        num_demo_participants=6,
+        # Same deck as the Fall 2026 paper session. Reshuffled every period.
+        # With 18 students, 9 are buyers and 9 sellers; other class sizes are split in half.
+        buyer_values=[10, 9, 9, 8, 8, 7, 7, 6, 6],
+        seller_costs=[2, 3, 3, 4, 5, 5, 6, 6, 7],
+        tax_round=7, tax_amount=1,         # $1 tax on sellers in period 7
+        ceiling_round=8, ceiling_price=6,  # $6 price ceiling in period 8
+    ),
+    dict(
         name='prisoners_dilemma',
         display_name='Prisoner\'s Dilemma (Fixed Partner)',
         app_sequence=['prisoners_dilemma'],

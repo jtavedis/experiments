@@ -1,0 +1,18 @@
+{{ block title }}Results of period {{ player.round_number }}{{ endblock }}
+{{ block content }}
+<table class="table table-sm" style="max-width:420px">
+  <tr><th>Your role</th><td>{% if role == 'buyer' %}Buyer{% else %}Seller{% endif %}</td></tr>
+  <tr><th>Your card</th><td>${{ card }}</td></tr>
+  {% if player.traded %}
+  <tr><th>Price</th><td>${{ price }}</td></tr>
+  {% if role == 'seller' and player.tax_paid %}<tr><th>Tax paid</th><td>${{ tax }}</td></tr>{% endif %}
+  <tr><th>Earnings this period</th><td><strong>${{ earnings }}</strong></td></tr>
+  {% else %}
+  <tr><th>Earnings this period</th><td>You did not trade: $0</td></tr>
+  {% endif %}
+  <tr><th>Total so far</th><td>${{ total }}</td></tr>
+</table>
+<h6>Whiteboard ({{ summary.trades }} trades)</h6>
+<p>{% if board %}{{ board }}{% else %}No trades.{% endif %}</p>
+{{ next_button }}
+{{ endblock }}

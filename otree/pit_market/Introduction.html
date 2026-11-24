@@ -1,0 +1,39 @@
+{{ block title }}Instructions{{ endblock }}
+{{ block content }}
+<div class="alert {% if role == 'buyer' %}alert-danger{% else %}alert-dark{% endif %}">
+  You are a <strong>{% if role == 'buyer' %}Buyer{% else %}Seller{% endif %}</strong> for all
+  {{ C.NUM_ROUNDS }} trading periods.
+</div>
+
+<p>We are going to set up a market in which you will be buyers or sellers of home painting services.
+At the start of every period you receive a new private card. Only you can see your number.
+Buyers' cards are <strong style="color:#c62828">red</strong> and sellers' cards are <strong>black</strong>.</p>
+<ul>
+  <li><strong>Buyers:</strong> your number is the most you are willing to pay. You may buy one unit per period.
+  You earn <em>value − price</em>. For example, with a 9 you buy at $4 and earn $9 − $4 = $5.
+  You may not buy above your value.</li>
+  <li><strong>Sellers:</strong> your number is your cost, the lowest price you can accept. You may sell one unit per period.
+  You earn <em>price − cost</em>. For example, with a 2 you sell at $3 and earn $3 − $2 = $1.
+  You may not sell below your cost.</li>
+  <li>If you do not trade, you earn $0 that period.</li>
+</ul>
+
+<h5>Trading on screen</h5>
+<p>Each period lasts {{ C.TRADING_SECONDS }} seconds (5 minutes). Every trader appears as a dot on the
+<em>trading floor</em>: red dots are buyers and black dots are sellers.</p>
+<ul>
+  <li><strong>Ask around.</strong> Click on a dot to see the price that trader is announcing, if any,
+  and to open a private chat with them. You can chat with as many traders on the other side of the market as you like.</li>
+  <li><strong>Announce a price</strong> (optional). This is what you would tell anyone who asks. It is not binding.</li>
+  <li><strong>Make an offer.</strong> In a chat, type a price and press <em>Offer</em>. If the other trader
+  accepts, the trade is made. You can withdraw an offer while it is still open, and a new offer to the same person replaces your old one.</li>
+  <li><strong>Choose among offers.</strong> Offers sent to you appear at the top of your screen. You may accept one, decline any of them, or wait.</li>
+  <li><strong>Front desk.</strong> Every accepted trade is checked. A price below the seller's cost or above the buyer's
+  value is invalidated, and both traders go back to negotiating.</li>
+  <li><strong>Whiteboard.</strong> Every valid trade price is posted on the whiteboard for everyone to see.
+  The two traders then turn grey and wait for the period to end.</li>
+</ul>
+<p>Some sellers with high costs and some buyers with low values may not be able to trade. Do not be discouraged:
+new cards are dealt every period. All earnings are hypothetical.</p>
+{{ next_button }}
+{{ endblock }}
