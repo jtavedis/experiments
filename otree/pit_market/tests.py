@@ -12,6 +12,25 @@ class PlayerBot(Bot):
             yield EnterName, dict(name_entry=f'Bot{self.player.id_in_group}')
             yield Introduction
         yield Submission(Trading, check_html=False, timeout_happened=True)
+        p, g = self.player, self.group
+        # Bargaining measures and period results are filled in for the standard export.
+        expect(p.conversations >= p.partners_contacted, True)
+        expect(p.field_maybe_none('pos_x') is not None, True)
+        if self.round_number > 1:
+            # same seat every period
+            prev = p.in_round(1)
+            expect((p.pos_x, p.pos_y), (prev.pos_x, prev.pos_y))
+        if p.partners_contacted:
+            expect(p.first_contact_rank >= 1 and p.mean_contact_dist >= 0, True)
+        if p.traded:
+            expect(p.partner_rank >= 1, True)
+        if p.traded:
+            expect(p.trade_order >= 1, True)
+            expect(p.trade_time >= 0, True)
+        if p.offers_sent:
+            expect(p.field_maybe_none('first_offer_price') is not None, True)
+        expect(g.num_trades, len([q for q in g.get_players() if q.traded]) // 2)
+        expect(g.max_surplus >= 0, True)   # can be 0 in a tiny class (e.g. buyer 6, seller 7)
         yield Results
         if self.round_number == C.NUM_ROUNDS:
             yield Survey, dict(survey_a=4, survey_b=3, survey_c=4, survey_d=2)
@@ -44,12 +63,15 @@ def call_live_method(method, round_number, **kwargs):
     expect(set(r), {b, s})
     expect(r[s]['msgs'][-1]['text'], 'what would you sell at?')
 
-    # Announced price is public, card is not.
-    r = send(s, type='post_price', price='7.5')
-    expect(len(r), len(state['players']))
-    pub = [p for p in r[b]['players'] if p['id'] == s][0]
-    expect(pub['posted'], 7.5)
-    expect('card' not in pub, True)
+    # No price or card is ever public; announcing a price is not possible.
+    pub = [p for p in state['players'] if p['id'] == s][0]
+    expect(set(pub), {'id', 'name', 'role', 'traded', 'x', 'y'})
+    expect(0 <= pub['x'] <= 600 and 0 <= pub['y'] <= 400, True)
+
+    # Opening a conversation is recorded silently: nobody gets a message.
+    expect(send(b, type='open', to=s, via='floor'), {})
+    expect([m for m in send(s, type='get_state')[s]['msgs'] if m['kind'] == 'open'], [])
+    expect(send(s, type='post_price', price='7.5')[s]['type'], 'error')
 
     # Front desk: price above every buyer value is invalidated, both keep trading.
     send(b, type='offer', to=s, price=50)
@@ -92,7 +114,7 @@ def call_live_method(method, round_number, **kwargs):
         expect(all(m['status'] != 'open' for m in st['msgs'] if m['kind'] == 'offer'), True)
         # Traded players can no longer act.
         expect(send(s, type='chat', to=buyer, text='x')[s]['type'], 'error')
-        expect(send(buyer, type='post_price', price=3)[buyer]['type'], 'error')
+        expect(send(buyer, type='offer', to=s, price=3)[buyer]['type'], 'error')
 
     # Price ceiling round: a trade above the ceiling is invalidated.
     if round_number == 8 and len(sellers) > 1 and len(buyers) > 1:

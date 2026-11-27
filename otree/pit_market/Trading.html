@@ -60,21 +60,7 @@
       </small>
     </div>
     <svg id="room" viewBox="0 0 600 400" role="img" aria-label="Trading floor"></svg>
-    <small class="text-muted">Click on a trader to see the price they announce and to talk to them.</small>
-
-    <div class="pm-panel p-2 mt-2" id="announce-box">
-      <label class="form-label mb-1 small fw-bold" for="announce-input">
-        {% if role == 'buyer' %}Price you'd tell anyone who asks what you'd pay{% else %}Price you'd tell anyone who asks what you'd sell for{% endif %}
-        <span class="fw-normal text-muted">(optional, not binding)</span>
-      </label>
-      <div class="input-group input-group-sm">
-        <span class="input-group-text">$</span>
-        <input type="number" step="0.01" min="0" class="form-control" id="announce-input" placeholder="e.g. 6">
-        <button type="button" class="btn btn-outline-primary" onclick="announce()">Announce</button>
-        <button type="button" class="btn btn-outline-secondary" onclick="clearAnnounce()">Clear</button>
-      </div>
-      <small class="text-muted" id="announce-current"></small>
-    </div>
+    <small class="text-muted">Click on a trader to talk to them and ask what price they would {% if role == 'buyer' %}sell{% else %}buy{% endif %} at.</small>
 
     <div class="pm-panel p-2 mt-2">
       <h6 class="mb-1">Whiteboard: prices traded this period</h6>
@@ -105,7 +91,6 @@
           <input type="number" step="0.01" min="0" class="form-control" id="offer-input" placeholder="price">
           <button type="button" class="btn btn-warning" id="offer-btn" onclick="sendOffer()"></button>
         </div>
-        <button type="button" class="btn btn-link btn-sm p-0 mt-1 d-none" id="use-their-price"></button>
         <div class="small text-muted mt-1">An offer is a firm proposal: if they accept it, the trade is made.</div>
       </div>
     </div>
@@ -158,24 +143,7 @@ function toast(text) {
   setTimeout(() => t.remove(), 4000);
 }
 
-// ── Layout of the room (same for everyone in the session) ──
-function hash(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
-function rng(seed) { return () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-let positions = null;
-function layout(players) {
-  const n = players.length, W = 600, H = 400;
-  const cols = Math.max(1, Math.ceil(Math.sqrt(n * 1.5))), rows = Math.ceil(n / cols);
-  const cw = W / cols, ch = H / rows;
-  const r = rng(hash(js_vars.session_code));
-  const cells = [...Array(cols * rows).keys()];
-  for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [cells[i], cells[j]] = [cells[j], cells[i]]; }
-  const pos = {};
-  players.slice().sort((a, b) => a.id - b.id).forEach((p, i) => {
-    const c = cells[i], cx = (c % cols + 0.5) * cw, cy = (Math.floor(c / cols) + 0.5) * ch;
-    pos[p.id] = {x: cx + (r() - 0.5) * cw * 0.35, y: cy + (r() - 0.5) * ch * 0.3};
-  });
-  return pos;
-}
+// Positions on the floor come from the server (each student keeps the same seat all session).
 
 function unreadFrom(id) {
   return S.msgs.filter(m => m.from === id && m.to === ME && m.id > (lastSeen[id] || 0)).length;
@@ -183,26 +151,20 @@ function unreadFrom(id) {
 
 function drawRoom() {
   const svg = document.getElementById('room');
-  if (!positions) positions = layout(S.players);
   const NS = 'http://www.w3.org/2000/svg';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
   svg.replaceChildren();
   for (const p of S.players) {
-    const {x, y} = positions[p.id];
+    const {x, y} = p;
     const g = mk('g', {class: 'dot', tabindex: 0});
-    g.addEventListener('click', () => openConvo(p.id));
-    g.addEventListener('keydown', e => { if (e.key === 'Enter') openConvo(p.id); });
+    g.addEventListener('click', () => openConvo(p.id, 'floor'));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter') openConvo(p.id, 'floor'); });
     const fill = p.traded ? '#bdbdbd' : (p.role === 'buyer' ? '#c62828' : '#222');
     if (p.id === selected) g.append(mk('circle', {cx: x, cy: y, r: 25, fill: 'none', stroke: '#e0a800', 'stroke-width': 4}));
     g.append(mk('circle', {cx: x, cy: y, r: 18, fill, stroke: p.id === ME ? '#0d6efd' : '#fff', 'stroke-width': p.id === ME ? 4 : 2}));
     const label = mk('text', {x, y: y + 34, 'text-anchor': 'middle', 'font-size': 13, fill: p.traded ? '#999' : '#222', 'font-weight': p.id === ME ? 700 : 400});
     label.textContent = p.id === ME ? p.name + ' (you)' : p.name;
     g.append(label);
-    if (p.posted != null && !p.traded) {
-      const t = mk('text', {x, y: y - 24, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: p.role === 'buyer' ? '#c62828' : '#222'});
-      t.textContent = '$' + fmt(p.posted);
-      g.append(t);
-    }
     const u = p.id === ME ? 0 : unreadFrom(p.id);
     if (u) {
       g.append(mk('circle', {cx: x + 15, cy: y - 14, r: 9, fill: '#0d6efd'}));
@@ -230,7 +192,7 @@ function drawWaitingOffers() {
   box.append(el('div', {class: 'fw-bold small mb-1'}, 'Offers waiting for your answer'));
   for (const m of open.sort((a, b) => MY_ROLE === 'seller' ? b.price - a.price : a.price - b.price)) {
     box.append(el('div', {class: 'waiting-offer'},
-      el('span', {style: 'cursor:pointer', onclick: () => openConvo(m.from)}, offerLabel(m)),
+      el('span', {style: 'cursor:pointer', onclick: () => openConvo(m.from, 'offers')}, offerLabel(m)),
       el('span', {},
         el('button', {type: 'button', class: 'btn btn-success btn-sm me-1', onclick: () => respond(m.id, 'accept')}, 'Accept'),
         el('button', {type: 'button', class: 'btn btn-outline-secondary btn-sm', onclick: () => respond(m.id, 'decline')}, 'Decline'))));
@@ -247,7 +209,7 @@ function drawInbox() {
   for (const id of ids) {
     const p = player(id), u = unreadFrom(id);
     const openIn = S.msgs.find(m => m.kind === 'offer' && m.status === 'open' && m.from === id && m.to === ME);
-    box.append(el('div', {class: 'inbox-row' + (id === selected ? ' active' : ''), onclick: () => openConvo(id)},
+    box.append(el('div', {class: 'inbox-row' + (id === selected ? ' active' : ''), onclick: () => openConvo(id, 'inbox')},
       el('span', {}, el('span', {class: 'pm-chip ' + p.role, style: p.traded ? 'background:#bdbdbd' : ''}, p.role === 'buyer' ? 'B' : 'S'), ' ', p.name,
          p.traded ? el('span', {class: 'text-muted small'}, ' (traded)') : null),
       el('span', {}, openIn ? el('span', {class: 'badge bg-warning text-dark me-1'}, 'offer $' + fmt(openIn.price)) : null,
@@ -266,10 +228,7 @@ function drawConvo() {
     el('div', {class: 'd-flex justify-content-between align-items-center'},
       el('span', {}, el('span', {class: 'pm-chip ' + p.role}, p.role === 'buyer' ? 'Buyer' : 'Seller'), ' ', el('strong', {}, p.name)),
       el('button', {type: 'button', class: 'btn-close', 'aria-label': 'Close', onclick: () => { selected = null; render(); }})),
-    el('div', {class: 'small mt-1'},
-      p.traded ? 'Has already traded and left the market.'
-      : p.posted != null ? 'Says they would ' + VERB[p.role] + ' at $' + fmt(p.posted) + '.'
-      : 'Has not announced a price yet.'));
+    ...(p.traded ? [el('div', {class: 'small mt-1'}, 'Has already traded and left the market.')] : []));
 
   const msgsBox = document.getElementById('convo-msgs');
   const composer = document.getElementById('composer');
@@ -304,12 +263,6 @@ function drawConvo() {
   const closed = S.me.traded || p.traded;
   composer.style.display = closed ? 'none' : '';
   document.getElementById('offer-btn').textContent = 'Offer to ' + VERB[MY_ROLE] + ' at this price';
-  const use = document.getElementById('use-their-price');
-  if (p.posted != null && !closed) {
-    use.classList.remove('d-none');
-    use.textContent = 'Use their announced price ($' + fmt(p.posted) + ')';
-    use.onclick = () => { document.getElementById('offer-input').value = p.posted; };
-  } else use.classList.add('d-none');
   markRead();
 }
 
@@ -320,14 +273,11 @@ function markRead() {
 }
 
 function drawMine() {
-  const cur = document.getElementById('announce-current');
-  cur.textContent = S.me.posted != null ? 'You are announcing $' + fmt(S.me.posted) + '.' : 'You are not announcing a price.';
   const banner = document.getElementById('traded-banner');
   if (S.me.traded) {
     banner.classList.remove('d-none');
     banner.textContent = 'You ' + (MY_ROLE === 'buyer' ? 'bought' : 'sold') + ' at $' + fmt(S.me.trade_price) +
       '. Your earnings this period: $' + fmt(S.me.earnings) + '. Please wait for the period to end.';
-    document.getElementById('announce-box').style.display = 'none';
   }
   const board = document.getElementById('board');
   board.replaceChildren(...S.board.map(b => el('li', {}, '$' + fmt(b.price))));
@@ -336,8 +286,9 @@ function drawMine() {
 
 function render() { drawRoom(); drawMine(); drawWaitingOffers(); drawInbox(); drawConvo(); drawRoom(); }
 
-function openConvo(id) {
+function openConvo(id, via) {
   if (id === ME) return;
+  if (id !== selected) liveSend({type: 'open', to: id, via: via});   // recorded for the data only
   selected = id;
   markRead.justOpened = true;
   render();
@@ -363,12 +314,6 @@ function liveRecv(data) {
   if (S.me.traded && !prevTraded) window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-function announce() {
-  const v = document.getElementById('announce-input').value;
-  if (v === '') return showError('Enter a price to announce.');
-  liveSend({type: 'post_price', price: v});
-}
-function clearAnnounce() { document.getElementById('announce-input').value = ''; liveSend({type: 'post_price', price: ''}); }
 function sendChat() {
   const inp = document.getElementById('chat-input');
   if (!inp.value.trim() || selected == null) return;
@@ -385,7 +330,6 @@ function respond(id, action) { liveSend({type: action, offer_id: id}); }
 
 document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } });
 document.getElementById('offer-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendOffer(); } });
-document.getElementById('announce-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); announce(); } });
 
 document.addEventListener('DOMContentLoaded', () => liveSend({type: 'get_state'}));
 </script>

@@ -1,3 +1,4 @@
+import math
 import random
 import statistics
 import time
@@ -9,9 +10,9 @@ Pit market (Experiment 6), decentralized version.
 
 Mirrors the classroom pit market: each student is a buyer or a seller and gets
 one private card per period. Students appear as dots in a shared "room".
-Clicking a dot shows the price that person chose to announce (never their
-card). Buyers and sellers talk in private one-to-one chats and send each other
-price offers; the receiver of an offer can accept or decline it, so a seller
+Nobody's price is shown on the floor: as in the room, a student has to go and
+ask. Clicking a dot opens a private one-to-one chat (cards are never shown).
+Buyers and sellers ask each other for prices and send each other price offers; the receiver of an offer can accept or decline it, so a seller
 holding several offers can pick the one they like. An accepted offer goes to
 the "front desk": if the price is below the seller's cost, above the buyer's
 value, or above a price ceiling, the trade is invalidated and both keep
@@ -35,6 +36,7 @@ DEFAULT_CEILING_ROUND = 8   # round with a legal maximum price
 DEFAULT_CEILING_PRICE = 6
 
 MAX_CHAT_LENGTH = 200
+FLOOR_W, FLOOR_H = 600, 400   # trading floor size, in the units used for positions and distances
 MAX_PRICE = 100
 
 
@@ -52,6 +54,19 @@ class Subsession(BaseSubsession):
 
 class Group(BaseGroup):
     start_time = models.FloatField()
+    # Market results for the period (filled in live and when the period ends)
+    policy = models.StringField()
+    num_trades = models.IntegerField(initial=0)
+    mean_price = models.FloatField()
+    sd_price = models.FloatField()
+    min_price = models.FloatField()
+    max_price = models.FloatField()
+    total_surplus = models.FloatField(initial=0)
+    max_surplus = models.FloatField()
+    efficiency = models.FloatField()
+    num_chats = models.IntegerField(initial=0)
+    num_offers = models.IntegerField(initial=0)
+    num_invalid = models.IntegerField(initial=0)
 
 
 def likert(label):
@@ -71,12 +86,42 @@ class Player(BasePlayer):
     name_entry = models.StringField(label='Please enter your first name (other traders will see it):')
     market_role = models.StringField()          # 'buyer' or 'seller'
     card = models.IntegerField()                # buyer value or seller cost
-    posted_price = models.FloatField(blank=True)
     traded = models.BooleanField(initial=False)
     trade_price = models.FloatField(blank=True)
     partner_id = models.IntegerField(blank=True)
     tax_paid = models.FloatField(initial=0)
     period_earnings = models.FloatField(initial=0)
+
+    # Bargaining measures for the period (one value per student per period)
+    trade_time = models.FloatField(doc='seconds into the period when the trade was verified')
+    trade_order = models.IntegerField(doc='position of this trade on the whiteboard')
+    trade_offer_mine = models.BooleanField(doc='True if the accepted offer was this student\'s own')
+    pos_x = models.FloatField(doc='position on the trading floor (0-600, left to right); a fixed seat for the whole session')
+    pos_y = models.FloatField(doc='position on the trading floor (0-400, top to bottom)')
+    nearest_other_side_dist = models.FloatField(doc='distance to the closest trader on the other side of the market')
+    traders_opened = models.IntegerField(initial=0, doc='different traders whose conversation this student opened (any side)')
+    first_open_time = models.FloatField(doc='seconds until this student first opened a conversation with the other side')
+    first_open_dist = models.FloatField(doc='distance to the first trader on the other side whose conversation this student opened')
+    first_open_rank = models.IntegerField(doc='1 = that trader was the closest one on the other side, 2 = second closest, ...')
+    first_contact_time = models.FloatField(doc='seconds until this student first sent a chat or offer')
+    first_contact_dist = models.FloatField(doc='distance to the first trader this student sent a chat or offer to')
+    first_contact_rank = models.IntegerField(doc='closeness rank of that trader among the other side (1 = closest)')
+    mean_contact_dist = models.FloatField(doc='mean distance to the traders this student sent a chat or offer to')
+    partner_dist = models.FloatField(doc='distance to the trading partner')
+    partner_rank = models.IntegerField(doc='closeness rank of the trading partner among the other side (1 = closest)')
+    partners_contacted = models.IntegerField(initial=0, doc='traders this student sent a chat or offer to')
+    conversations = models.IntegerField(initial=0, doc='traders this student exchanged any chat or offer with')
+    chats_sent = models.IntegerField(initial=0)
+    chats_received = models.IntegerField(initial=0)
+    offers_sent = models.IntegerField(initial=0)
+    offers_received = models.IntegerField(initial=0)
+    offers_declined_by_me = models.IntegerField(initial=0)
+    my_offers_declined = models.IntegerField(initial=0)
+    offers_withdrawn = models.IntegerField(initial=0)
+    invalid_trades = models.IntegerField(initial=0, doc='accepted trades this student was in that the front desk invalidated')
+    first_offer_price = models.FloatField()
+    first_offer_time = models.FloatField()
+    first_offer_margin = models.FloatField(doc='surplus the opening offer claimed: price - cost (seller) or value - price (buyer)')
 
     survey_a = likert('a. I enjoyed this activity.')
     survey_b = likert('b. This experiment contributed to my learning of the subject matter.')
@@ -90,6 +135,8 @@ class Msg(ExtraModel):
     kind:   'chat'   free text
             'offer'  a price proposal the receiver can accept or decline
             'system' front-desk notices, trade confirmations, etc.
+            'open'   the sender opened a conversation with the receiver (not shown to
+                     anyone); text says where they clicked: floor, inbox or offers
     status (offers only): open, accepted, declined, withdrawn, replaced,
             expired (someone traded elsewhere / period ended), invalid
     """
@@ -103,15 +150,6 @@ class Msg(ExtraModel):
     price = models.FloatField()
     status = models.StringField()
     resolved_t = models.FloatField()     # when an offer stopped being open
-
-
-class PostedPrice(ExtraModel):
-    """Log of announced (non-binding) prices."""
-    group = models.Link(Group)
-    round_number = models.IntegerField()
-    t = models.FloatField()
-    player_id = models.IntegerField()
-    price = models.FloatField()           # -1 means cleared
 
 
 # ── Session settings helpers ──────────────────────────────────────────────────
@@ -177,6 +215,43 @@ def creating_session(subsession: Subsession):
         for p, card in zip(group_players, cards):
             p.card = card
 
+    # Each student gets a random "seat" on the trading floor in period 1 and keeps it
+    # for the whole session, as students return to their own seats in the classroom.
+    # Every screen shows the same map.
+    if subsession.round_number == 1:
+        pos = floor_positions(session.code, [p.id_in_group for p in players])
+        for p in players:
+            p.participant.vars['floor_pos'] = pos[p.id_in_group]
+    for p in players:
+        p.pos_x, p.pos_y = p.participant.vars['floor_pos']
+
+
+def floor_positions(seed, ids):
+    """Scatter traders over a grid of cells in random order, jittered within each cell."""
+    rng = random.Random(seed)
+    n = len(ids)
+    cols = max(1, math.ceil(math.sqrt(n * 1.5)))
+    rows = max(1, math.ceil(n / cols))
+    cw, ch = FLOOR_W / cols, FLOOR_H / rows
+    cells = list(range(cols * rows))
+    rng.shuffle(cells)
+    out = {}
+    for pid, c in zip(sorted(ids), cells):
+        x = (c % cols + 0.5) * cw + (rng.random() - 0.5) * cw * 0.35
+        y = (c // cols + 0.5) * ch + (rng.random() - 0.5) * ch * 0.3
+        out[pid] = (round(x, 1), round(y, 1))
+    return out
+
+
+def distance(a, b):
+    return round(math.hypot(a.pos_x - b.pos_x, a.pos_y - b.pos_y), 1)
+
+
+def closeness_rank(p, other, players):
+    """1 if other is p's closest trader on the other side of the market, 2 if second closest, ..."""
+    d = distance(p, other)
+    return 1 + len([q for q in players if q.market_role != p.market_role and distance(p, q) < d])
+
 
 def deck_for(deck, k):
     """k cards from the deck. If there are more traders than cards, extra
@@ -229,8 +304,9 @@ def public_state(group: Group):
                 'id': p.id_in_group,
                 'name': names[p.id_in_group],
                 'role': p.market_role,
-                'posted': p.field_maybe_none('posted_price'),
                 'traded': p.traded,
+                'x': p.pos_x,
+                'y': p.pos_y,
             }
             for p in group.get_players()
         ],
@@ -245,7 +321,7 @@ def personal_state(player: Player, public, msgs):
             'id': m.id, 'from': m.sender, 'to': m.receiver, 'kind': m.kind,
             'text': m.text, 'price': m.price, 'status': m.status, 't': m.t,
         }
-        for m in msgs if m.sender == me or m.receiver == me
+        for m in msgs if (m.sender == me or m.receiver == me) and m.kind != 'open'
     ]
     return {
         'type': 'state',
@@ -255,7 +331,6 @@ def personal_state(player: Player, public, msgs):
             'traded': player.traded,
             'trade_price': player.field_maybe_none('trade_price'),
             'earnings': player.period_earnings,
-            'posted': player.field_maybe_none('posted_price'),
         },
         'msgs': mine,
     }
@@ -312,31 +387,41 @@ def counterpart(player: Player, other_id):
 
 
 def live_trading(player: Player, data):
+    result = _live_trading(player, data)
+    if data.get('type') != 'get_state' and result:
+        ids = [pid for pid, v in result.items() if v.get('type') == 'state']
+        if ids:
+            update_stats(player.group, ids)
+    return result
+
+
+def _live_trading(player: Player, data):
     group = player.group
     me = player.id_in_group
     action = data.get('type')
-    everyone = [p.id_in_group for p in group.get_players()]
 
     if action == 'get_state':
         return states_for(group, [me])
 
     if time_left(group) <= 0:
         return error(player, 'The trading period is over.')
+
+    if action == 'open':
+        # Record that this student opened a conversation (clicked a dot, an inbox row
+        # or an offer). Nobody is notified; this only goes into the data.
+        try:
+            other = group.get_player_by_id(int(data.get('to')))
+        except Exception:
+            return None
+        if other.id_in_group == me:
+            return None
+        via = str(data.get('via') or '')[:10]
+        new_msg(group, me, other.id_in_group, 'open', text=via)
+        update_stats(group, [me])
+        return None
+
     if player.traded:
         return error(player, 'You have already traded this period. Please wait for the period to end.')
-
-    if action == 'post_price':
-        raw = data.get('price')
-        if raw in (None, ''):
-            player.posted_price = None
-            PostedPrice.create(group=group, round_number=group.round_number, t=elapsed(group), player_id=me, price=-1)
-        else:
-            price = parse_price(raw)
-            if price is None:
-                return error(player, f'Please enter a price between 0 and {MAX_PRICE}.')
-            player.posted_price = price
-            PostedPrice.create(group=group, round_number=group.round_number, t=elapsed(group), player_id=me, price=price)
-        return states_for(group, everyone)
 
     if action == 'chat':
         other = counterpart(player, data.get('to'))
@@ -428,7 +513,6 @@ def accept_offer(player: Player, offer: Msg):
         p.traded = True
         p.trade_price = price
         p.partner_id = partner.id_in_group
-        p.posted_price = None
     buyer.period_earnings = buyer.card - price
     seller.tax_paid = tax
     seller.period_earnings = price - seller.card - tax
@@ -446,6 +530,8 @@ def accept_offer(player: Player, offer: Msg):
             set_status(group, m, 'expired')
     talked = set()
     for m in Msg.filter(group=group):
+        if m.kind not in ('chat', 'offer'):
+            continue
         for a, b in ((m.sender, m.receiver), (m.receiver, m.sender)):
             if a in gone and b not in gone:
                 talked.add((a, b))
@@ -459,6 +545,77 @@ def close_period(group: Group):
     for m in Msg.filter(group=group):
         if m.kind == 'offer' and m.status == 'open':
             set_status(group, m, 'expired')
+    update_stats(group, [p.id_in_group for p in group.get_players()])
+
+
+def update_stats(group: Group, ids):
+    """Recompute the bargaining measures (players in ids) and the period's market results."""
+    msgs = group_msgs(group)
+    accepted = sorted([m for m in msgs if m.kind == 'offer' and m.status == 'accepted'], key=lambda m: m.resolved_t)
+    players = group.get_players()
+    for pid in ids:
+        p = group.get_player_by_id(pid)
+        others = [q for q in players if q.market_role != p.market_role]
+        if others:
+            p.nearest_other_side_dist = min(distance(p, q) for q in others)
+        opens = [m for m in msgs if m.sender == pid and m.kind == 'open']
+        p.traders_opened = len({m.receiver for m in opens})
+        opens_other_side = [m for m in opens if group.get_player_by_id(m.receiver).market_role != p.market_role]
+        if opens_other_side:
+            first = opens_other_side[0]
+            q = group.get_player_by_id(first.receiver)
+            p.first_open_time = first.t
+            p.first_open_dist = distance(p, q)
+            p.first_open_rank = closeness_rank(p, q, players)
+        sent = [m for m in msgs if m.sender == pid and m.kind in ('chat', 'offer')]
+        got = [m for m in msgs if m.receiver == pid and m.kind in ('chat', 'offer')]
+        my_offers = [m for m in sent if m.kind == 'offer']
+        their_offers = [m for m in got if m.kind == 'offer']
+        p.partners_contacted = len({m.receiver for m in sent})
+        p.conversations = len({m.receiver for m in sent} | {m.sender for m in got})
+        p.chats_sent = len([m for m in sent if m.kind == 'chat'])
+        p.chats_received = len([m for m in got if m.kind == 'chat'])
+        p.offers_sent = len(my_offers)
+        p.offers_received = len(their_offers)
+        p.offers_declined_by_me = len([m for m in their_offers if m.status == 'declined'])
+        p.my_offers_declined = len([m for m in my_offers if m.status == 'declined'])
+        p.offers_withdrawn = len([m for m in my_offers if m.status == 'withdrawn'])
+        p.invalid_trades = len([m for m in my_offers + their_offers if m.status == 'invalid'])
+        if sent:
+            first = min(sent, key=lambda m: m.id)
+            q = group.get_player_by_id(first.receiver)
+            p.first_contact_time = first.t
+            p.first_contact_dist = distance(p, q)
+            p.first_contact_rank = closeness_rank(p, q, players)
+            contacted = [group.get_player_by_id(i) for i in {m.receiver for m in sent}]
+            p.mean_contact_dist = round(statistics.mean(distance(p, q) for q in contacted), 1)
+        if my_offers:
+            first = min(my_offers, key=lambda m: m.id)
+            p.first_offer_price = first.price
+            p.first_offer_time = first.t
+            p.first_offer_margin = round(first.price - p.card if p.market_role == 'seller' else p.card - first.price, 2)
+        for i, m in enumerate(accepted):
+            if pid in (m.sender, m.receiver):
+                p.trade_time = m.resolved_t
+                p.trade_order = i + 1
+                p.trade_offer_mine = m.sender == pid
+                partner = group.get_player_by_id(m.receiver if m.sender == pid else m.sender)
+                p.partner_dist = distance(p, partner)
+                p.partner_rank = closeness_rank(p, partner, players)
+
+    summary = round_summary(group, group.session)
+    group.policy = summary['policy']
+    group.num_trades = summary['trades']
+    group.mean_price = summary['mean']
+    group.sd_price = summary['sd']
+    group.min_price = summary['low']
+    group.max_price = summary['high']
+    group.total_surplus = summary['total_surplus']
+    group.max_surplus = summary['max_surplus']
+    group.efficiency = round(summary['total_surplus'] / summary['max_surplus'], 4) if summary['max_surplus'] else None
+    group.num_chats = len([m for m in msgs if m.kind == 'chat'])
+    group.num_offers = len([m for m in msgs if m.kind == 'offer'])
+    group.num_invalid = len([m for m in msgs if m.kind == 'offer' and m.status == 'invalid'])
 
 
 # ── Benchmarks (for results and the admin report) ─────────────────────────────
@@ -646,9 +803,10 @@ page_sequence = [
 # ── Data export: every bargaining event, one row each ─────────────────────────
 def custom_export(players):
     yield [
-        'session', 'round', 't_seconds', 'event', 'sender_id', 'sender_name', 'sender_role',
+        'session', 'round', 'policy', 'event_id', 't_seconds', 'event', 'sender_id', 'sender_name', 'sender_role',
         'sender_card', 'receiver_id', 'receiver_name', 'receiver_role', 'receiver_card',
         'price', 'offer_status', 'offer_resolved_t', 'text',
+        'sender_x', 'sender_y', 'receiver_x', 'receiver_y', 'distance', 'receiver_closeness_rank',
     ]
     seen = set()
     for p in players:
@@ -664,17 +822,21 @@ def custom_export(players):
                 return ['', '', '']
             return [q.participant.vars.get('display_name', ''), q.market_role, q.field_maybe_none('card')]
 
+        def where(a, b):
+            pa, pb = by_id.get(a), by_id.get(b)
+            if pa is None or pb is None or pa.field_maybe_none('pos_x') is None:
+                return ['', '', '', '', '', '']
+            rank = closeness_rank(pa, pb, list(by_id.values())) if pa.market_role != pb.market_role else ''
+            return [pa.pos_x, pa.pos_y, pb.pos_x, pb.pos_y, distance(pa, pb), rank]
+
         rows = []
         for m in Msg.filter(group=g):
             rows.append((m.t, m.id, [
-                g.session.code, g.round_number, m.t, m.kind, m.sender, *who(m.sender),
+                g.session.code, g.round_number, policy_text(g.session, g.round_number) or 'Baseline',
+                m.id, m.t, m.kind, m.sender, *who(m.sender),
                 m.receiver, *who(m.receiver), '' if m.price < 0 else m.price, m.status,
                 '' if (m.resolved_t is None or m.resolved_t < 0) else m.resolved_t, m.text,
-            ]))
-        for pp in PostedPrice.filter(group=g):
-            rows.append((pp.t, -pp.id, [
-                g.session.code, g.round_number, pp.t, 'posted_price', pp.player_id, *who(pp.player_id),
-                '', '', '', '', '' if pp.price < 0 else pp.price, 'cleared' if pp.price < 0 else '', '', '',
+                *where(m.sender, m.receiver),
             ]))
         for _, _, row in sorted(rows, key=lambda r: (r[0], r[1])):
             yield row
